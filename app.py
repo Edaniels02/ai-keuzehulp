@@ -22,15 +22,15 @@ openai.api_key = OPENAI_API_KEY
 def home():
     return "AI Keuzehulp is running! Use the /ask endpoint."
 
-# De /ask route accepteert nu zowel GET als POST
+# /ask route that accepts both GET and POST requests
 @app.route("/ask", methods=["GET", "POST"])
 def ask_ai():
     if request.method == 'GET':
-        # Als de gebruiker via GET de /ask-aanroep doet, geef een demo-antwoord
+        # For GET requests, return a demo answer
         return jsonify({"answer": "Dit is een demo van de AI Keuzehulp! Stel een vraag via POST."})
     
     elif request.method == 'POST':
-        # Als de gebruiker een POST-aanroep doet, gebruik dan de bestaande OpenAI logica
+        # For POST requests, process the question using OpenAI
         user_input = request.json.get("question", "")
         
         if not user_input:
@@ -84,3 +84,4 @@ def get_products():
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8080)
+
