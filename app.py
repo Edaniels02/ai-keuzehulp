@@ -22,50 +22,30 @@ openai.api_key = OPENAI_API_KEY
 def home():
     return "AI Keuzehulp is running! Use the /ask endpoint."
 
-# /ask route that accepts both GET and POST requests
 @app.route("/ask", methods=["GET", "POST"])
 def ask_ai():
     if request.method == 'GET':
-        # For GET requests, return a demo answer
-        return jsonify({"answer": "Dit is een demo van de AI Keuzehulp! Stel een vraag via POST."})
+        # Voor een GET verzoek, stuur een welkom bericht en start het gesprek met de tv-vragen
+        return jsonify({
+            "answer": "Welkom bij de AI Keuzehulp! Laten we beginnen met het stellen van enkele vragen over tv's. "
+                       "1️⃣ Waarvoor wil je de TV gebruiken? (Dagelijks TV-kijken, Films & Series, Sport, Gaming, Weet ik niet)"
+        })
     
     elif request.method == 'POST':
-        # For POST requests, process the question using OpenAI
+        # Als een POST verzoek binnenkomt, stel dan vragen en geef antwoorden via OpenAI
         user_input = request.json.get("question", "")
         
         if not user_input:
-            return jsonify({"error": "No question received"}), 400
+            return jsonify({"error": "Geen vraag ontvangen"}), 400
         
-        # Structured AI Flow to guide users towards the best TV choice
+        # Start het gesprek met de tv-vragen en stuur verder met OpenAI
         prompt = f"""
-        Jij bent de AI Keuzehulp van Expert.nl. Je helpt klanten bij het kiezen van de perfecte televisie. Je stelt eerst enkele vragen om de behoeften van de klant te begrijpen en daarna geef je een concreet advies. Als een klant vraagt om alternatieven, bied je maximaal drie opties.
-
-        ✅ **Stel systematisch de volgende vragen**:
-        1️⃣ Waarvoor wil je de TV gebruiken? (Dagelijks TV-kijken, Films & Series, Sport, Gaming, Weet ik niet)
-        2️⃣ Welk formaat zoek je? (43", 50", 55", 65", 75"+)
-        3️⃣ Heb je voorkeur voor een schermtechnologie? (OLED, QLED, LED, Weet ik niet)
-        4️⃣ Wat is je budget? (Bijvoorbeeld: Tot €1000, €1000-€1500, Meer dan €1500)
-        5️⃣ Wil je extra smartfuncties of specifieke features? (AirPlay, Google TV, HDMI 2.1 voor gaming, Geen voorkeur)
-
-        ✅ **Beperk keuzes niet te snel**
-        - Zorg ervoor dat er altijd een TV overblijft.
-        - Als een exacte match ontbreekt, bied dan 2-3 alternatieven die zo dicht mogelijk aansluiten bij de wensen.
-        - Als een TV niet op voorraad is, geef dit aan en bied een vergelijkbaar alternatief.
-
-        ✅ **Extra eisen en service vanuit Expert.nl**
-        - Nooit negatieve uitspraken over merken.
-        - Geen adviezen over concurrenten, je legt uit waarom Expert een goede keuze is (eigen installateurs, 140 fysieke winkels, lokale service).
-
-        ✅ **Productinformatie**
-        Hier zijn enkele beschikbare TV's die je kunt aanbevelen:
-        {json.dumps(products[:5], indent=2)}
-
-        🎯 Op basis van bovenstaande instructies, verwerk de vraag van de klant op een professionele en klantvriendelijke manier.
-
+        Jij bent de AI Keuzehulp van Expert.nl. Je helpt klanten bij het kiezen van de perfecte televisie. 
+        Je stelt eerst enkele vragen om de behoeften van de klant te begrijpen en daarna geef je een concreet advies.
+        
         Vraag van de klant: {user_input}
         """
         
-        # Call OpenAI API
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-4",
@@ -74,7 +54,7 @@ def ask_ai():
             )
             answer = response["choices"][0]["message"]["content"].strip()
         except Exception as e:
-            answer = f"Error processing AI response: {str(e)}"
+            answer = f"Fout bij het verwerken van het AI-antwoord: {str(e)}"
         
         return jsonify({"answer": answer})
 
