@@ -18,6 +18,32 @@ else:
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
 
+# Vraag flow
+questions = [
+    "Waarvoor wil je de TV gebruiken? (Dagelijks TV-kijken, Films & Series, Sport, Gaming, Weet ik niet)",
+    "Welk formaat zoek je? (43\", 50\", 55\", 65\", 75\"+)",
+    "Heb je voorkeur voor een schermtechnologie? (OLED, QLED, LED, Weet ik niet)",
+    "Wat is je budget? (Bijvoorbeeld: Tot €1000, €1000-€1500, Meer dan €1500)",
+    "Wil je extra smartfuncties of specifieke features? (AirPlay, Google TV, HDMI 2.1 voor gaming, Geen voorkeur)"
+]
+
+# OpenAI API prompts
+def get_prompt(user_input, current_question):
+    return f"""
+    Jij bent de AI Keuzehulp van Expert.nl. Je helpt klanten bij het kiezen van de perfecte televisie. 
+    Je stelt eerst enkele vragen om de behoeften van de klant te begrijpen en daarna geef je een concreet advies.
+
+    Vragen:
+    1. Waarvoor wil je de TV gebruiken?
+    2. Welk formaat zoek je?
+    3. Heb je voorkeur voor een schermtechnologie?
+    4. Wat is je budget?
+    5. Wil je extra smartfuncties of specifieke features?
+
+    Huidige vraag: {current_question}
+    Antwoord van de klant: {user_input}
+    """
+
 @app.route("/", methods=["GET"])
 def home():
     return "AI Keuzehulp is running! Use the /ask endpoint."
@@ -25,10 +51,9 @@ def home():
 @app.route("/ask", methods=["GET", "POST"])
 def ask_ai():
     if request.method == 'GET':
-        # Voor een GET verzoek, stuur een welkom bericht en start het gesprek met de tv-vragen
+        # Voor een GET verzoek, stuur de eerste vraag
         return jsonify({
-            "answer": "Welkom bij de AI Keuzehulp! Laten we beginnen met het stellen van enkele vragen over tv's. "
-                       "1️⃣ Waarvoor wil je de TV gebruiken? (Dagelijks TV-kijken, Films & Series, Sport, Gaming, Weet ik niet)"
+            "answer": questions[0]
         })
     
     elif request.method == 'POST':
@@ -38,14 +63,17 @@ def ask_ai():
         if not user_input:
             return jsonify({"error": "Geen vraag ontvangen"}), 400
         
-        # Start het gesprek met de tv-vragen en stuur verder met OpenAI
-        prompt = f"""
-        Jij bent de AI Keuzehulp van Expert.nl. Je helpt klanten bij het kiezen van de perfecte televisie. 
-        Je stelt eerst enkele vragen om de behoeften van de klant te begrijpen en daarna geef je een concreet advies.
-        
-        Vraag van de klant: {user_input}
-        """
-        
+        # Vraagnummer bijhouden
+        question_index = int(request.json.get("question_index", 0))
+
+        # Geef de juiste vraag gebaseerd op de vorige antwoorden
+        if question_index < len(questions):
+            current_question = questions[question_index]
+        else:
+            current_question = "Bedankt voor je antwoorden, hier zijn enkele suggesties gebaseerd op je voorkeuren."
+
+        prompt = get_prompt(user_input, current_question)
+
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-4",
@@ -56,7 +84,7 @@ def ask_ai():
         except Exception as e:
             answer = f"Fout bij het verwerken van het AI-antwoord: {str(e)}"
         
-        return jsonify({"answer": answer})
+        return jsonify({"answer": answer, "next_question_index": question_index + 1})
 
 @app.route("/products", methods=["GET"])
 def get_products():
@@ -64,4 +92,3 @@ def get_products():
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=8080)
-
