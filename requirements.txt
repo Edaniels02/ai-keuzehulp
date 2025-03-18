@@ -1,4 +1,4 @@
-flask
-pandas
-openai
-gunicorn
+Flask==2.2.3
+pandas==1.5.3
+openai==0.28.0
+gunicorn==20.1.0
