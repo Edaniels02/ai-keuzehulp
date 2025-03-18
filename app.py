@@ -321,6 +321,4 @@ def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"error": "Interne serverfout."}), 500
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+
