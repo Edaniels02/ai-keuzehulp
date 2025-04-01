@@ -12,19 +12,22 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 app = Flask(__name__)
 CORS(app)
 
-# Load product feed CSV
-product_feed_path = os.path.join(os.getcwd(), 'data', 'productfeed.csv')
+# Load product feed
+product_feed_path = os.path.join("data", "productfeed.csv")
 df = None
 try:
     df = pd.read_csv(product_feed_path, skipinitialspace=True)
     logging.info(f"Loaded product feed with {len(df)} products.")
 except Exception as e:
-    logging.error(f"Could not load product feed: {e}")
+    logging.error(f"Failed to load product feed: {e}")
 
 # System prompt
-system_prompt = "Je bent een tv-keuzehulp."
+system_prompt = (
+    "Jij bent de AI Keuzehulp van Expert.nl. Je helpt klanten met het vinden van de perfecte televisie. "
+    "Je begeleidt de klant door een reeks gerichte vragen en zorgt ervoor dat er altijd een geschikte aanbeveling uitkomt."
+)
 
-# Parse user preferences
+# Parse user preferences from conversation
 def parse_preferences(messages):
     import re
     brand_pref, size_pref, budget, usage = None, None, None, []
@@ -60,7 +63,7 @@ def parse_preferences(messages):
 
     return brand_pref, size_pref, budget, " ".join(usage)
 
-# Build recommendations from feed
+# Build recommendations
 def build_recommendation(brand, size, budget, usage):
     if df is None or df.empty:
         return "Geen productdata beschikbaar."
@@ -105,7 +108,7 @@ def build_recommendation(brand, size, budget, usage):
 def home():
     return "AI Keuzehulp is actief."
 
-# HTML-interface
+# HTML interface
 @app.route("/keuzehulp")
 def keuzehulp():
     return render_template("index.html")
@@ -113,9 +116,6 @@ def keuzehulp():
 # Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
-    if not request.is_json:
-        return jsonify({"error": "JSON verwacht."}), 400
-
     data = request.get_json()
     messages = data.get("messages") or []
     message = data.get("message")
@@ -145,14 +145,13 @@ def chat():
         logging.error(f"OpenAI fout: {e}")
         return jsonify({"error": "Probleem met AI-berekening."}), 500
 
-# Static file route (optional, if using CSS/JS)
+# Static files (if needed)
 @app.route("/static/<path:path>")
 def send_static(path):
     return send_from_directory("static", path)
 
-# Fallback error handler
+# Global error handler
 @app.errorhandler(Exception)
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
-    return jsonify({"error": "Interne fout."}), 500
-
+    return jsonify({"error": "Er is een interne fout opgetreden."}), 500
