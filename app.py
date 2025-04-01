@@ -126,7 +126,7 @@ def chat():
     elif messages:
         conversation += [m for m in messages if m.get("role") != "system"]
     else:
-        return jsonify({"error": "Geen bericht ontvangen."}), 400
+        return jsonify({"assistant": "Geen bericht ontvangen."}), 400
 
     last_msg = conversation[-1].get("content", "").lower()
     if any(kw in last_msg for kw in ["aanbevel", "welke", "advies", "kopen"]):
@@ -143,7 +143,7 @@ def chat():
         return jsonify({"assistant": response['choices'][0]['message']['content']})
     except Exception as e:
         logging.error(f"OpenAI fout: {e}")
-        return jsonify({"error": "Probleem met AI-berekening."}), 500
+        return jsonify({"assistant": f"Fout bij OpenAI: {e}"}), 500
 
 # Static files (if needed)
 @app.route("/static/<path:path>")
@@ -154,4 +154,4 @@ def send_static(path):
 @app.errorhandler(Exception)
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
-    return jsonify({"error": "Er is een interne fout opgetreden."}), 500
+    return jsonify({"assistant": f"Interne fout: {e}"}), 500
