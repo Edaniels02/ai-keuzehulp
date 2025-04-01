@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Expert AI Keuzehulp</title>
+</head>
+<body>
+  <h1>Welkom bij de Expert AI Keuzehulp</h1>
+  <div id="chatbox"></div>
+  <input type="text" id="userInput" placeholder="Typ hier je vraag..." />
+  <button onclick="sendMessage()">Verstuur</button>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value;
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+      document.getElementById("chatbox").innerHTML +=
+        "<p><strong>Jij:</strong> " + message + "</p>";
+      document.getElementById("chatbox").innerHTML +=
+        "<p><strong>Expert:</strong> " + data.assistant + "</p>";
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
