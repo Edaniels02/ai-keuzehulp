@@ -35,7 +35,7 @@ system_prompt = (
 
     "📋 Vragenstructuur:\n"
     "1. Waarvoor wil je de TV gebruiken? (bijv. Films, Sport, Gamen, Dagelijks tv-kijken)\n"
-    "2. Welk formaat zoek je? (bijv. 43\"", 50\"", 55\"", 65\"", 75\"+)\n"
+    "2. Welk formaat zoek je? (bijv. 43\", 50\", 55\", 65\", 75\"+)\n"
     "3. Heb je een voorkeur voor schermtechnologie? (bijv. OLED, QLED, LED, Weet ik niet)\n"
     "4. Wat is je budget? (bijv. Tot €1000, €1000-€1500, Meer dan €1500)\n"
     "5. Zijn er extra features die je belangrijk vindt? (bijv. Ambilight, HDMI 2.1, Chromecast)\n\n"
@@ -92,3 +92,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
+
