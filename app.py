@@ -77,5 +77,43 @@ system_prompt = (
     "- Toon relevante specificaties uit de feed zoals schermformaat, prijs, en speciale functies."
 )
 
-# Remainder of app logic (unchanged) continues here...
+@app.route("/")
+def home():
+    return "AI Keuzehulp is actief."
 
+@app.route("/keuzehulp")
+def keuzehulp():
+    return render_template("index.html")
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    user_input = data.get("message")
+
+    if not user_input:
+        return jsonify({"assistant": "Ik heb geen vraag ontvangen."})
+
+    try:
+        response = openai.ChatCompletion.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+        antwoord = response['choices'][0]['message']['content']
+        return jsonify({"assistant": antwoord})
+    except Exception as e:
+        logging.error(f"Fout bij OpenAI-call: {e}")
+        return jsonify({"assistant": f"Fout bij OpenAI: {e}"}), 500
+
+@app.route("/static/<path:path>")
+def send_static(path):
+    return send_from_directory("static", path)
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.error(f"Unhandled exception: {e}")
+    return jsonify({"assistant": f"Interne fout: {e}"}), 500
