@@ -1,9 +1,9 @@
 import os
 import logging
-import openai
 import pandas as pd
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
+from openai import OpenAI
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -11,6 +11,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Initialize OpenAI client
+client = OpenAI()
 
 # Load product feed
 product_feed_path = os.path.join("data", "productfeed.csv")
@@ -134,13 +137,13 @@ def chat():
         return jsonify({"assistant": build_recommendation(brand, size, budget, usage)})
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
             messages=conversation,
             temperature=0.7,
             max_tokens=500
         )
-        return jsonify({"assistant": response['choices'][0]['message']['content']})
+        return jsonify({"assistant": response.choices[0].message.content})
     except Exception as e:
         logging.error(f"OpenAI fout: {e}")
         return jsonify({"assistant": f"Fout bij OpenAI: {e}"}), 500
@@ -155,3 +158,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
+
