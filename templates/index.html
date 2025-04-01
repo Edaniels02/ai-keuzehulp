@@ -40,9 +40,10 @@
         }
 
         .message {
-            margin: 12px 0;
+            margin: 10px 0;
             line-height: 1.6;
             white-space: pre-line;
+            color: #000;
         }
 
         .user {
@@ -50,12 +51,14 @@
             color: #333;
         }
 
-        .assistant {
+        .assistant::before {
+            content: "🤖 ";
+            font-weight: bold;
             color: #ff6600;
         }
 
-        .assistant strong {
-            font-weight: bold;
+        .assistant b {
+            color: #ff6600;
         }
 
         form {
@@ -88,6 +91,17 @@
         button:hover {
             background-color: #e65c00;
         }
+
+        ul.options {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 4px;
+            margin-bottom: 0;
+        }
+
+        ul.options li {
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -98,12 +112,14 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
-            <strong>🤖 Keuzehulp:</strong><br>
-            Goedemorgen! Laten we beginnen met het vinden van de perfecte televisie voor jou. Waarvoor wil je de tv vooral gebruiken?<br>
-            • Films 🎬<br>
-            • Sport ⚽<br>
-            • Gamen 🎮<br>
-            • Of gewoon dagelijks tv-kijken 📺
+            <b>Expert AI:</b> Goedemorgen! Laten we beginnen met het vinden van de perfecte televisie voor jou.<br>
+            Waarvoor wil je de tv vooral gebruiken?
+            <ul class="options">
+                <li>Films</li>
+                <li>Sport</li>
+                <li>Gamen</li>
+                <li>Of gewoon dagelijks tv-kijken</li>
+            </ul>
         </div>
     </div>
 
@@ -138,7 +154,7 @@
             const data = await response.json();
             const assistantMessage = document.createElement("div");
             assistantMessage.className = "message assistant";
-            assistantMessage.innerHTML = "<strong>🤖 Keuzehulp:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
+            assistantMessage.innerHTML = `<b>Expert AI:</b> ` + (data.assistant || data.error || "Geen antwoord ontvangen.");
             chatBox.appendChild(assistantMessage);
 
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -146,3 +162,4 @@
     </script>
 </body>
 </html>
+
