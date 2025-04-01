@@ -1,33 +1,62 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8" />
-  <title>Expert AI Keuzehulp</title>
-</head>
-<body>
-  <h1>Welkom bij de Expert AI Keuzehulp</h1>
-  <div id="chatbox"></div>
-  <input type="text" id="userInput" placeholder="Typ hier je vraag..." />
-  <button onclick="sendMessage()">Verstuur</button>
+import os
+import logging
+import openai
+import pandas as pd
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
-  <script>
-    async function sendMessage() {
-      const input = document.getElementById("userInput");
-      const message = input.value;
-      const response = await fetch("/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message })
-      });
-      const data = await response.json();
-      document.getElementById("chatbox").innerHTML +=
-        "<p><strong>Jij:</strong> " + message + "</p>";
-      document.getElementById("chatbox").innerHTML +=
-        "<p><strong>Expert:</strong> " + data.assistant + "</p>";
-      input.value = "";
-    }
-  </script>
-</body>
-</html>
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)
+
+# Load product feed
+df = None
+try:
+    df = pd.read_csv(os.path.join("data", "productfeed.csv"), skipinitialspace=True)
+    logging.info(f"Loaded product feed with {len(df)} products.")
+except Exception as e:
+    logging.error(f"Failed to load product feed: {e}")
+
+# Startpagina
+@app.route("/")
+def home():
+    return "AI Keuzehulp is actief."
+
+# HTML-interface
+@app.route("/keuzehulp")
+def keuzehulp():
+    return render_template("index.html")
+
+# Chat endpoint
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    user_input = data.get("message")
+
+    if not user_input:
+        return jsonify({"assistant": "Ik heb geen vraag ontvangen."})
+
+    try:
+        response = openai.ChatCompletion.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
+            messages=[
+                {"role": "system", "content": "Je bent een behulpzame AI die mensen helpt een televisie te kiezen."},
+                {"role": "user", "content": user_input}
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+        antwoord = response['choices'][0]['message']['content']
+        return jsonify({"assistant": antwoord})
+    except Exception as e:
+        logging.error(f"Fout bij OpenAI-call: {e}")
+        return jsonify({"assistant": "Er ging iets mis bij het ophalen van een antwoord."})
+
+# Fallback error handler
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.error(f"Unhandled exception: {e}")
+    return jsonify({"error": "Er is een interne fout opgetreden."}), 500
