@@ -21,7 +21,7 @@ try:
 except Exception as e:
     logging.error(f"Could not load product feed: {e}")
 
-# Simple system prompt
+# System prompt
 system_prompt = "Je bent een tv-keuzehulp."
 
 # Parse user preferences
@@ -100,10 +100,17 @@ def build_recommendation(brand, size, budget, usage):
 
     return "\n".join(lines) + (f"\n\nGeschikt voor: {usage}." if usage else "")
 
+# Homepage
 @app.route("/")
-def health():
+def home():
     return "AI Keuzehulp is actief."
 
+# HTML-interface
+@app.route("/keuzehulp")
+def keuzehulp():
+    return render_template("index.html")
+
+# Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
     if not request.is_json:
@@ -138,15 +145,14 @@ def chat():
         logging.error(f"OpenAI fout: {e}")
         return jsonify({"error": "Probleem met AI-berekening."}), 500
 
-@app.route("/keuzehulp")
-def keuzehulp_interface():
-    return render_template("index.html")
-
+# Static file route (optional, if using CSS/JS)
 @app.route("/static/<path:path>")
 def send_static(path):
     return send_from_directory("static", path)
 
+# Fallback error handler
 @app.errorhandler(Exception)
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"error": "Interne fout."}), 500
+
