@@ -1,9 +1,9 @@
 import os
 import logging
-import openai
 import pandas as pd
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
+from openai import OpenAI
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -94,7 +94,8 @@ def chat():
         return jsonify({"assistant": "Ik heb geen vraag ontvangen."})
 
     try:
-        response = openai.ChatCompletion.create(
+        client = OpenAI()
+        response = client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -103,7 +104,7 @@ def chat():
             temperature=0.7,
             max_tokens=500
         )
-        antwoord = response['choices'][0]['message']['content']
+        antwoord = response.choices[0].message.content
         return jsonify({"assistant": antwoord})
     except Exception as e:
         logging.error(f"Fout bij OpenAI-call: {e}")
