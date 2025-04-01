@@ -1,9 +1,9 @@
 import os
 import logging
+import openai
 import pandas as pd
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
-from openai import OpenAI
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -11,9 +11,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
-
-# Initialize OpenAI client
-client = OpenAI()
 
 # Load product feed
 product_feed_path = os.path.join("data", "productfeed.csv")
@@ -26,8 +23,8 @@ except Exception as e:
 
 # System prompt
 system_prompt = (
-    "Jij bent de AI Keuzehulp van Expert.nl. Je helpt klanten met het vinden van de perfecte televisie. "
-    "Je begeleidt de klant door een reeks gerichte vragen en zorgt ervoor dat er altijd een geschikte aanbeveling uitkomt."
+    "Hallo! Welkom bij de AI Keuzehulp van Expert.nl. Ik help je de perfecte televisie te vinden."
+    " Zullen we beginnen? Waarvoor wil je de tv vooral gebruiken: films, sport, gamen of dagelijks tv-kijken?"
 )
 
 # Parse user preferences from conversation
@@ -129,7 +126,7 @@ def chat():
     elif messages:
         conversation += [m for m in messages if m.get("role") != "system"]
     else:
-        return jsonify({"assistant": "Geen bericht ontvangen."}), 400
+        return jsonify({"assistant": system_prompt})
 
     last_msg = conversation[-1].get("content", "").lower()
     if any(kw in last_msg for kw in ["aanbevel", "welke", "advies", "kopen"]):
@@ -137,6 +134,7 @@ def chat():
         return jsonify({"assistant": build_recommendation(brand, size, budget, usage)})
 
     try:
+        client = openai.OpenAI()
         response = client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
             messages=conversation,
@@ -158,4 +156,5 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
+
 
