@@ -12,8 +12,7 @@
         }
 
         header {
-            display: flex;
-            align-items: center;
+            text-align: center;
             background-color: #fff;
             padding: 15px 30px;
             border-bottom: 2px solid #ff6600;
@@ -21,13 +20,15 @@
 
         header img {
             height: 50px;
-            margin-right: 20px;
+            vertical-align: middle;
         }
 
         header h1 {
+            display: inline-block;
             color: #003366;
             font-size: 28px;
-            margin: 0;
+            margin-left: 15px;
+            vertical-align: middle;
         }
 
         .chat-container {
@@ -51,14 +52,12 @@
             color: #333;
         }
 
-        .assistant::before {
-            content: "🤖 ";
-            font-weight: bold;
+        .assistant strong {
             color: #ff6600;
         }
 
-        .assistant b {
-            color: #ff6600;
+        .assistant {
+            color: #000;
         }
 
         form {
@@ -91,17 +90,6 @@
         button:hover {
             background-color: #e65c00;
         }
-
-        ul.options {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin-top: 4px;
-            margin-bottom: 0;
-        }
-
-        ul.options li {
-            margin-bottom: 4px;
-        }
     </style>
 </head>
 <body>
@@ -112,14 +100,12 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
-            <b>Expert AI:</b> Goedemorgen! Laten we beginnen met het vinden van de perfecte televisie voor jou.<br>
-            Waarvoor wil je de tv vooral gebruiken?
-            <ul class="options">
-                <li>Films</li>
-                <li>Sport</li>
-                <li>Gamen</li>
-                <li>Of gewoon dagelijks tv-kijken</li>
-            </ul>
+            <strong>🤖 Expert AI:</strong> Goedemorgen! Laten we beginnen met het vinden van de perfecte televisie voor jou. <br><br>
+            Waarvoor wil je de tv vooral gebruiken?<br>
+            • Films<br>
+            • Sport<br>
+            • Gamen<br>
+            • Of gewoon dagelijks tv-kijken
         </div>
     </div>
 
@@ -154,7 +140,7 @@
             const data = await response.json();
             const assistantMessage = document.createElement("div");
             assistantMessage.className = "message assistant";
-            assistantMessage.innerHTML = `<b>Expert AI:</b> ` + (data.assistant || data.error || "Geen antwoord ontvangen.");
+            assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
             chatBox.appendChild(assistantMessage);
 
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -162,4 +148,3 @@
     </script>
 </body>
 </html>
-
