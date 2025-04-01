@@ -82,7 +82,17 @@ def home():
 @app.route("/keuzehulp")
 def keuzehulp():
     session.clear()
-    session['messages'] = [{"role": "system", "content": system_prompt}]
+    session['messages'] = [
+        {"role": "system", "content": system_prompt},
+        {"role": "assistant", "content": (
+            "Laten we beginnen met de eerste vraag om je voorkeuren te ontdekken:\n"
+            "Waarvoor wil je de tv vooral gebruiken?\n"
+            "• Films\n"
+            "• Sport\n"
+            "• Gamen\n"
+            "• Of gewoon dagelijks tv-kijken"
+        )}
+    ]
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
@@ -120,4 +130,5 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
+
 
