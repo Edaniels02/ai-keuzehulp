@@ -1,7 +1,7 @@
 import os
 import logging
 import pandas as pd
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, session
 from flask_cors import CORS
 from openai import OpenAI
 
@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 
 # Initialize Flask app
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "supersecret")  # Needed for session management
 CORS(app)
 
 # Load product feed
@@ -21,7 +22,7 @@ try:
 except Exception as e:
     logging.error(f"Failed to load product feed: {e}")
 
-# System prompt
+# Static system prompt for initial context
 system_prompt = (
     "Jij bent de Expert AI van Expert.nl. Je helpt klanten met het vinden van de perfecte televisie. "
     "Je begeleidt de klant door een reeks gerichte vragen en zorgt ervoor dat er altijd een geschikte aanbeveling uitkomt.\n\n"
@@ -30,9 +31,9 @@ system_prompt = (
     "- Leid de klant naar een concreet advies op basis van de opgegeven voorkeuren.\n"
     "- Geef altijd een of meerdere opties; er mag geen situatie zijn waarin je geen aanbeveling doet.\n\n"
     "✅ Vragenstructuur:\n"
-    "1. Waarvoor wil je de TV gebruiken? (bijv. standaard tv-kijken, films/series, sport, gamen)\n"
-    "2. Welk formaat zoek je? (bijv. 43\" tot 75\"+)\n"
-    "3. Heb je voorkeur voor een schermtechnologie? (bijv. OLED, QLED, LED)\n"
+    "1. Waarvoor wil je de TV gebruiken?\n"
+    "2. Welk formaat zoek je?\n"
+    "3. Heb je voorkeur voor een schermtechnologie?\n"
     "4. Wat is je budget?\n"
     "5. Wil je extra smartfuncties of specifieke features?\n\n"
     "📌 Advies en Resultaten:\n"
@@ -44,28 +45,10 @@ system_prompt = (
     "- Geen adviezen over of vergelijkingen met andere winkels of webshops.\n"
     "- Geef aan dat je als Expert AI exclusief adviseert voor Expert.nl — met een knipoog of glimlach mag best! 😉\n"
     "- Leg uit waarom Expert een goede keuze is: eigen installateurs, 140 fysieke winkels, lokale service.\n\n"
-    "✅ Voorraadstatus en Alternatieven:\n"
-    "- Als een aanbevolen TV niet op voorraad is:\n"
-    "  Geef aan dat deze niet beschikbaar is.\n"
-    "  Vraag de klant of je een alternatief moet zoeken.\n"
-    "  Geef direct een vergelijkbare optie en leg uit wat het verschil is.\n\n"
-    "🎯 Voorbeeldaanbeveling:\n"
-    "Op basis van je voorkeuren is de beste keuze de LG OLED C2 (55\"). Dit model heeft perfect zwart, diepe kleuren en een snelle refresh rate – ideaal voor zowel films als gaming!\n\n"
     "🧠 Let op:\n"
-    "- Als de gebruiker een onverwachte of algemene vraag stelt, geef dan een vriendelijk en kort antwoord met een vleugje humor.\n"
-    "- Herpak daarna de regie en stel voor om verder te gaan met de keuzehulpvragen.\n"
-    "- Houd het luchtig, klantvriendelijk, behulpzaam en positief.\n"
-    "- Gebruik emoji's spaarzaam en alleen als ze echt iets toevoegen.\n\n"
-    "📌 Reactiestijl:\n"
-    "- Reageer met korte en relevante formuleringen.\n"
-    "- Gebruik indien passend termen als: 'Helder', 'Genoteerd', 'Duidelijk'.\n"
-    "- Bijvoorbeeld: 'Duidelijk, je wilt de tv gebruiken om te gamen. Welk formaat tv zoek je?'\n"
-    "- Maak geen gebruik van overmatige emoji's of standaardzinnen als 'Wat leuk dat je...'."
-    "\n\n"
-    "📌 Productfeed Gebruik:\n"
-    "- Gebruik de actuele productfeed (geladen vanuit een CSV).\n"
-    "- Selecteer alleen televisies die op dat moment beschikbaar zijn.\n"
-    "- Toon relevante specificaties uit de feed zoals schermformaat, prijs, en speciale functies."
+    "- Reageer kort, vriendelijk en duidelijk.\n"
+    "- Als de gebruiker een onverwachte vraag stelt, geef daar kort antwoord op en vervolg met een gerichte keuzevraag.\n"
+    "- Gebruik emoji's spaarzaam en alleen als ze echt iets toevoegen."
 )
 
 @app.route("/")
@@ -74,6 +57,8 @@ def home():
 
 @app.route("/keuzehulp")
 def keuzehulp():
+    session.clear()
+    session['messages'] = [{"role": "system", "content": system_prompt}]
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
@@ -84,18 +69,21 @@ def chat():
     if not user_input:
         return jsonify({"assistant": "Ik heb geen vraag ontvangen."})
 
+    # Retrieve or start session messages
+    conversation = session.get("messages", [{"role": "system", "content": system_prompt}])
+    conversation.append({"role": "user", "content": user_input})
+
     try:
         client = OpenAI()
         response = client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_input}
-            ],
+            messages=conversation,
             temperature=0.7,
             max_tokens=500
         )
         antwoord = response.choices[0].message.content
+        conversation.append({"role": "assistant", "content": antwoord})
+        session["messages"] = conversation
         return jsonify({"assistant": antwoord})
     except Exception as e:
         logging.error(f"Fout bij OpenAI-call: {e}")
