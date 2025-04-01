@@ -2,7 +2,7 @@ import os
 import logging
 import openai
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 
 # Setup logging
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 app = Flask(__name__)
 CORS(app)
 
-# Load product feed CSV from the /data directory
+# Load product feed CSV
 product_feed_path = os.path.join(os.getcwd(), 'data', 'productfeed.csv')
 df = None
 try:
@@ -21,6 +21,10 @@ try:
 except Exception as e:
     logging.error(f"Could not load product feed: {e}")
 
+# Simple system prompt
+system_prompt = "Je bent een tv-keuzehulp."
+
+# Parse user preferences
 def parse_preferences(messages):
     import re
     brand_pref, size_pref, budget, usage = None, None, None, []
@@ -56,6 +60,7 @@ def parse_preferences(messages):
 
     return brand_pref, size_pref, budget, " ".join(usage)
 
+# Build recommendations from feed
 def build_recommendation(brand, size, budget, usage):
     if df is None or df.empty:
         return "Geen productdata beschikbaar."
@@ -108,7 +113,7 @@ def chat():
     messages = data.get("messages") or []
     message = data.get("message")
 
-    conversation = [{"role": "system", "content": "Je bent een tv-keuzehulp."}]
+    conversation = [{"role": "system", "content": system_prompt}]
     if message:
         conversation.append({"role": "user", "content": message})
     elif messages:
@@ -132,6 +137,14 @@ def chat():
     except Exception as e:
         logging.error(f"OpenAI fout: {e}")
         return jsonify({"error": "Probleem met AI-berekening."}), 500
+
+@app.route("/keuzehulp")
+def keuzehulp_interface():
+    return render_template("index.html")
+
+@app.route("/static/<path:path>")
+def send_static(path):
+    return send_from_directory("static", path)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
