@@ -41,7 +41,8 @@
 
         .message {
             margin: 10px 0;
-            line-height: 1.5;
+            line-height: 1.6;
+            white-space: pre-line;
         }
 
         .user {
@@ -51,7 +52,6 @@
 
         .assistant {
             color: #007F00;
-            white-space: pre-line;
         }
 
         form {
@@ -94,14 +94,13 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
-            <strong>🤖 Keuzehulp:</strong> Goedemorgen!
-            Laten we beginnen met het vinden van de perfecte televisie voor jou.
-
-            Waarvoor wil je de tv vooral gebruiken:
-            - films
-            - sport
-            - gamen
-            - of gewoon dagelijks tv-kijken?
+            <strong>🤖 Keuzehulp:</strong><br><br>
+            Goedemorgen! Laten we beginnen met het vinden van de perfecte televisie voor jou. 📺<br><br>
+            Waarvoor wil je de tv vooral gebruiken?<br>
+            • Films 🎬<br>
+            • Sport ⚽<br>
+            • Gamen 🎮<br>
+            • Of gewoon dagelijks tv-kijken 📺
         </div>
     </div>
 
@@ -120,7 +119,6 @@
             const userText = input.value.trim();
             if (!userText) return;
 
-            // Voeg gebruikerbericht toe
             const userMessage = document.createElement("div");
             userMessage.className = "message user";
             userMessage.innerHTML = "<strong>🧑 Jij:</strong> " + userText;
@@ -128,7 +126,6 @@
 
             input.value = "";
 
-            // Haal AI-reactie op
             const response = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
