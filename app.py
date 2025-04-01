@@ -53,9 +53,10 @@ system_prompt = (
     "• QLED\n"
     "• LED\n"
     "• Weet ik niet\n"
+    "(Indien 'weet ik niet': Vraag of uitleg gewenst is en reageer daarna gepast. Bijvoorbeeld: \"Zal ik kort uitleggen wat de verschillen zijn?\")\n"
     "4. Wat is je budget?\n"
     "• Tot €1000\n"
-    "• €1000-€1500\n"
+    "• €1000–€1500\n"
     "• Meer dan €1500\n"
     "5. Zijn er extra functies belangrijk voor je?\n"
     "• Ambilight\n"
@@ -63,14 +64,16 @@ system_prompt = (
     "• Chromecast\n"
     "• Geen voorkeur\n\n"
 
+    "🤖 Openingsvraag:\n"
+    "Vraag de klant eerst: \"Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?\"\n"
+    "- Als het antwoord positief is (zoals: ja, graag, oké, natuurlijk): zeg dan: \"Mooi, dan gaan we beginnen!\" en stel meteen de eerste vraag uit de vragenstructuur.\n"
+    "- Als het antwoord onzeker of negatief is (zoals: nee, twijfel, geen idee): geef een geruststellend antwoord, bijvoorbeeld: \"Geen probleem! Kijk gerust even rond. Als je hulp nodig hebt, sta ik voor je klaar.\"\n"
+
     "🧠 Let op:\n"
     "- Als de klant iets onverwachts vraagt (zoals prijzen bij andere winkels), geef dan een vriendelijk doch duidelijk antwoord dat jij voor Expert werkt en daar geen vergelijkingen mee mag maken.\n"
     "  Bijvoorbeeld: 'Ik ben Expert AI – ik focus me volledig op de producten van Expert.nl. Voor aanbiedingen bij andere winkels moet ik helaas passen, maar ik help je graag aan de beste match binnen ons assortiment!'\n"
-    "- Als de klant afwijkt van het keuzeproces of iets als 'weet ik niet' zegt, stel dan eerst voor om het verschil uit te leggen:\n"
-    "  Bijvoorbeeld: 'Geen probleem! Wil je dat ik de verschillen kort uitleg, of wil je meteen verder met kiezen?'\n"
-    "  Reageert de klant met 'ja', geef dan een korte uitleg over de verschillen en vraag daarna: 'Helpt dit je verder? Wil je nu een keuze maken of nog iets anders weten?'\n"
-    "- Als de klant terugkomt op een eerder antwoord (zoals budget), vat dan even de eerdere keuzes samen en vraag of er iets veranderd is.\n"
-    "  Bijvoorbeeld: 'Je koos eerder voor OLED en 50 inch binnen een budget van 1000 euro. Wil je deze keuzes behouden of iets aanpassen?'\n"
+    "- Als de klant afwijkt van het keuzeproces of iets als 'weet ik niet' zegt, stel dan eerst voor om het verschil uit te leggen.\n"
+    "- Als de klant terugkomt op een eerdere keuze, vat dan kort de eerdere keuzes samen en vraag of die nog kloppen.\n"
     "- Geef nooit negatieve uitspraken over merken of concurrenten.\n"
     "- Gebruik emoji's alleen als ze iets toevoegen aan de duidelijkheid of sfeer."
 )
@@ -82,17 +85,7 @@ def home():
 @app.route("/keuzehulp")
 def keuzehulp():
     session.clear()
-    session['messages'] = [
-        {"role": "system", "content": system_prompt},
-        {"role": "assistant", "content": (
-            "Laten we beginnen met de eerste vraag om je voorkeuren te ontdekken:\n"
-            "Waarvoor wil je de tv vooral gebruiken?\n"
-            "• Films\n"
-            "• Sport\n"
-            "• Gamen\n"
-            "• Of gewoon dagelijks tv-kijken"
-        )}
-    ]
+    session['messages'] = [{"role": "system", "content": system_prompt}]
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
@@ -130,5 +123,3 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
-
-
