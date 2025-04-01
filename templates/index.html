@@ -1,89 +1,148 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Keuzehulp – Expert.nl</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    h1 {
-      color: #0066cc;
-    }
-    #chat {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      background-color: #fff;
-      max-width: 600px;
-      margin-bottom: 1rem;
-      height: 400px;
-      overflow-y: auto;
-    }
-    .message {
-      margin-bottom: 1rem;
-    }
-    .user {
-      font-weight: bold;
-    }
-    .assistant {
-      color: #006600;
-    }
-    form {
-      display: flex;
-      gap: 0.5rem;
-    }
-    input[type="text"] {
-      flex: 1;
-      padding: 0.5rem;
-    }
-    button {
-      padding: 0.5rem 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Expert AI Keuzehulp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f6f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px 30px;
+            border-bottom: 2px solid #ff6600;
+        }
+
+        header img {
+            height: 50px;
+            margin-right: 20px;
+        }
+
+        header h1 {
+            color: #003366;
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .message {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .user {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .assistant {
+            color: #007F00;
+            white-space: pre-line;
+        }
+
+        form {
+            display: flex;
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin-left: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e65c00;
+        }
+    </style>
 </head>
 <body>
-  <h1>🧠 AI Keuzehulp voor Televisies</h1>
-  <div id="chat"></div>
+    <header>
+        <img src="{{ url_for('static', filename='images/expert_logo.jpg') }}" alt="Expert logo">
+        <h1>Expert AI Keuzehulp</h1>
+    </header>
 
-  <form id="chat-form">
-    <input type="text" id="user-input" placeholder="Typ je vraag of voorkeur..." required />
-    <button type="submit">Verstuur</button>
-  </form>
+    <div class="chat-container" id="chat-box">
+        <div class="message assistant">
+            <strong>🤖 Keuzehulp:</strong> Goedemorgen!
+            Laten we beginnen met het vinden van de perfecte televisie voor jou.
 
-  <script>
-    const form = document.getElementById('chat-form');
-    const input = document.getElementById('user-input');
-    const chatBox = document.getElementById('chat');
+            Waarvoor wil je de tv vooral gebruiken:
+            - films
+            - sport
+            - gamen
+            - of gewoon dagelijks tv-kijken?
+        </div>
+    </div>
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const message = input.value.trim();
-      if (!message) return;
+    <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Typ je vraag of voorkeur..." required>
+        <button type="submit">Verstuur</button>
+    </form>
 
-      // Voeg user message toe
-      chatBox.innerHTML += `<div class="message user">👤 Jij: ${message}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-      input.value = "";
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const form = document.getElementById("chat-form");
+        const input = document.getElementById("user-input");
 
-      try {
-        const response = await fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: message })
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            // Voeg gebruikerbericht toe
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user";
+            userMessage.innerHTML = "<strong>🧑 Jij:</strong> " + userText;
+            chatBox.appendChild(userMessage);
+
+            input.value = "";
+
+            // Haal AI-reactie op
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userText })
+            });
+
+            const data = await response.json();
+            const assistantMessage = document.createElement("div");
+            assistantMessage.className = "message assistant";
+            assistantMessage.innerHTML = "<strong>🤖 Keuzehulp:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
+            chatBox.appendChild(assistantMessage);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
-
-        const data = await response.json();
-        const reply = data.assistant || "Geen antwoord ontvangen.";
-        chatBox.innerHTML += `<div class="message assistant">🤖 Keuzehulp: ${reply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } catch (err) {
-        chatBox.innerHTML += `<div class="message assistant">⚠️ Fout bij ophalen van antwoord.</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
