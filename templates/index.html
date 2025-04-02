@@ -99,6 +99,12 @@
         ul li {
             margin-bottom: 2px;
         }
+
+        .intro-image {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -110,6 +116,8 @@
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
             <p><strong>Welkom bij de Expert AI keuzehulp!</strong></p>
+            <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV overzicht" class="intro-image">
+            <br>
             <strong>🤖 Expert AI:</strong><br><br>
             Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?
         </div>
@@ -154,4 +162,5 @@
     </script>
 </body>
 </html>
+
 
