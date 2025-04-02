@@ -100,10 +100,22 @@
             margin-bottom: 2px;
         }
 
+        .intro-text {
+            font-size: 26px;
+            color: #ff6600;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
         .intro-image {
             max-width: 100%;
-            margin-top: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
             border-radius: 10px;
+        }
+
+        .assistant p {
+            margin: 4px 0;
         }
     </style>
 </head>
@@ -115,11 +127,10 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
-            <p><strong>Welkom bij de Expert AI keuzehulp!</strong></p>
+            <div class="intro-text">Welkom bij de Expert AI keuzehulp!</div>
             <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV overzicht" class="intro-image">
-            <br>
-            <strong>🤖 Expert AI:</strong><br><br>
-            Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?
+            <p><strong>🤖 Expert AI:</strong></p>
+            <p>Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?</p>
         </div>
     </div>
 
@@ -162,5 +173,4 @@
     </script>
 </body>
 </html>
-
 
