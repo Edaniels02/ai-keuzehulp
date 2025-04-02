@@ -21,7 +21,7 @@ try:
 except Exception as e:
     logging.error(f"Failed to load product feed: {e}")
 
-# Updated system prompt (without logging)
+# Updated system prompt with refined flow and context
 system_prompt = (
     "Jij bent de Expert AI van Expert.nl. Je helpt klanten met het vinden van de perfecte televisie. "
     "Je begeleidt de klant stap voor stap via een reeks gerichte vragen. Per stap stel je één duidelijke vraag, "
@@ -51,7 +51,7 @@ system_prompt = (
     "• 55\"\n"
     "• 65\"\n"
     "• 75\"+\n"
-    "(Gebruik ook kijkafstand voor aanbeveling als de klant dit noemt)\n"
+    "• Ik weet het nog niet\n"
     "3. Heb je een voorkeur voor schermtechnologie?\n"
     "• OLED\n"
     "• QLED\n"
@@ -78,9 +78,7 @@ system_prompt = (
     "- Je baseert je aanbevelingen op de producten uit de geladen productcatalogus (CSV).\n"
     "- Geef geen opties die niet in de catalogus beschikbaar zijn binnen het opgegeven budget.\n"
     "- Toon relevante specificaties zoals prijs, merk, formaat, en functies.\n"
-    "- Als een gevraagd merk niet in de catalogus voorkomt, geef dit duidelijk en vriendelijk aan.\n"
-    "  Stel relevante alternatieven voor met merken die wél passen bij de eerder opgegeven voorkeuren.\n"
-    "  Vraag eventueel of de klant zijn voorkeuren wil aanpassen.\n"
+    "- Als een merk niet beschikbaar is, geef dit vriendelijk aan en stel alternatieven voor die wél passen bij de voorkeuren.\n"
 
     "\n🧠 Let op:\n"
     "- Vraag niet opnieuw naar eerder beantwoorde voorkeuren.\n"
@@ -136,3 +134,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
+
