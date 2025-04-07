@@ -24,7 +24,7 @@ except Exception as e:
     logging.error(f"Failed to load product feed: {e}")
     unieke_merken = []
 
-# Updated system prompt with menselijke, vloeiende toon
+# Updated system prompt with menselijke, vloeiende toon + conditionele logica en bevestiging van antwoorden
 merk_opties = "\n".join([f"• {chr(65+i)}: {merk}" for i, merk in enumerate(unieke_merken)])
 
 system_prompt = (
@@ -37,6 +37,8 @@ system_prompt = (
     "- Reageer op eerdere antwoorden en bouw daar logisch op verder.\n"
     "- Antwoord op een manier die natuurlijk voelt: alsof je een gesprek voert, niet een lijstje afwerkt.\n"
     "- Gebruik duidelijke opsommingen en emoji's als dat helpt om de sfeer los te maken of iets visueel te verduidelijken.\n"
+    "- Herhaal geen vragen als eerder een vergelijkbare vraag gesteld is én het antwoord daarop afhoudend of negatief was (zoals 'nee', 'geen voorkeur').\n"
+    "- Vat elk antwoord vriendelijk samen, zodat duidelijk is dat je het goed hebt begrepen.\n"
 
     "\n📋 Vragenstructuur:\n"
     "1. Waarvoor wil je de TV gebruiken?\n"
@@ -141,4 +143,5 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
+
 
