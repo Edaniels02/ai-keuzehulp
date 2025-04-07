@@ -17,11 +17,16 @@ CORS(app)
 df = None
 try:
     df = pd.read_csv(os.path.join("data", "productfeed.csv"), skipinitialspace=True)
-    logging.info(f"Loaded product feed with {len(df)} products.")
+    df = df[df["categorie"].str.contains("Televisies", na=False)]
+    unieke_merken = sorted(df["merk"].dropna().unique().tolist())
+    logging.info(f"Loaded product feed with {len(df)} TVs from {len(unieke_merken)} merken.")
 except Exception as e:
     logging.error(f"Failed to load product feed: {e}")
+    unieke_merken = []
 
 # Updated system prompt with flexibility and recent learnings
+merk_opties = "\n".join([f"• {chr(65+i)}: {merk}" for i, merk in enumerate(unieke_merken)])
+
 system_prompt = (
     "Jij bent de Expert AI van Expert.nl. Je helpt klanten met het vinden van de perfecte televisie. "
     "Je begeleidt de klant stap voor stap via een reeks gerichte vragen. Per stap stel je één duidelijke vraag, "
@@ -46,26 +51,29 @@ system_prompt = (
     "• Gamen\n"
     "• Dagelijks tv-kijken\n"
     "• Combinatie van meerdere\n"
-    "2. Welk formaat zoek je?\n"
+    "2. Wat is je budget?\n"
+    "• A: Tot €750\n"
+    "• B: €750–€1000\n"
+    "• C: €1000–€1500\n"
+    "• D: €1500–€2000\n"
+    "• E: Meer dan €2000\n"
+    "(Gebruik de productcatalogus om opties binnen dit budget te identificeren voordat je vervolgvragen stelt.)\n"
+    "3. Heb je een voorkeur voor een merk?\n"
+    f"{merk_opties}\n"
+    "• Z: Geen voorkeur\n"
+    "4. Welk formaat zoek je?\n"
     "• 43\"\n"
     "• 50\"\n"
     "• 55\"\n"
     "• 65\"\n"
     "• 75\"+\n"
     "• Ik weet het nog niet\n"
-    "(Gebruik ook kijkafstand voor aanbeveling als de klant dit noemt)\n"
-    "3. Heb je een voorkeur voor schermtechnologie?\n"
+    "5. Heb je een voorkeur voor schermtechnologie?\n"
     "• OLED\n"
     "• QLED\n"
     "• LED\n"
     "• Weet ik niet\n"
-    "(Indien 'weet ik niet': Vraag of uitleg gewenst is en reageer daarna gepast. Bijvoorbeeld: \"Zal ik kort uitleggen wat de verschillen zijn?\")\n"
-    "4. Wat is je budget?\n"
-    "• Tot €1000\n"
-    "• €1000–€1500\n"
-    "• Meer dan €1500\n"
-    "(Gebruik de productcatalogus om realistische voorstellen te doen. Noem prijzen uit de catalogus als dat helpt.)\n"
-    "5. Zijn er extra functies belangrijk voor je?\n"
+    "6. Zijn er extra functies belangrijk voor je?\n"
     "• Ambilight\n"
     "• HDMI 2.1\n"
     "• Chromecast\n"
@@ -93,7 +101,6 @@ system_prompt = (
     "\n🧠 Let op:\n"
     "- Vraag niet opnieuw naar eerder beantwoorde voorkeuren.\n"
     "- Als de klant terugkomt op een eerdere keuze (zoals formaat of budget), vat die kort samen en vraag of deze gewijzigd moet worden.\n"
-    "- Als de klant vraagt om een muurbeugel, geef een relevante aanbeveling met prijs, gericht op het gewenste formaat/montage.\n"
     "- Als de klant om aanbiedingen vraagt, ga ervan uit dat het om Expert-aanbiedingen gaat.\n"
     "- Gebruik geen het woord 'productfeed', spreek over 'onze productcatalogus'.\n"
     "- Geef nooit negatieve uitspraken over merken of concurrenten.\n"
