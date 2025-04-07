@@ -53,7 +53,7 @@ system_prompt = (
     "• D. €1500–€2000\n"
     "• E. Meer dan €2000\n"
     "3. Heb je een voorkeur voor een merk?\n"
-    + ''.join([f"• {merk}\n" for merk in sorted(df['Merk'].dropna().unique())]) +
+    + ''.join([f"• {merk}\n" for merk in sorted(df['Merk'].dropna().unique()) if merk.strip().lower() not in ['yamaha', 'denon', 'pioneer', 'marantz']]) +
     "4. Welk formaat zoek je?\n"
     "• 43\"\n"
     "• 50\"\n"
@@ -79,7 +79,6 @@ system_prompt = (
     "- Herhaal geen vragen als het antwoord al duidelijk is.\n"
     "- Vat kort samen: bijvoorbeeld 'Geen voorkeur voor extra functies – helder!'\n"
     "- Vermijd dubbele uitvragen zoals herhaald vragen naar Ambilight of HDMI 2.1\n"
-    "- Gebruik emoji's alleen als ze iets toevoegen aan de duidelijkheid of sfeer, bijvoorbeeld een duim omhoog bij bevestiging of een televisie-icoon bij een advies.\n"
 
     "\n🎯 Accessoire-advies:\n"
     "- Als de klant een muurbeugel of accessoire noemt, filter op basis van type (zoals vaste beugel of draaibaar), grootte, en compatibiliteit.\n"
@@ -107,6 +106,7 @@ system_prompt = (
     "- Als de klant om aanbiedingen vraagt, ga ervan uit dat het om Expert-aanbiedingen gaat.\n"
     "- Gebruik geen het woord 'productfeed', spreek over 'onze productcatalogus'.\n"
     "- Geef nooit negatieve uitspraken over merken of concurrenten.\n"
+    "- Gebruik emoji's spaarzaam en alleen als ze écht iets toevoegen aan sfeer of duidelijkheid.\n"
 )
 
 @app.route("/")
@@ -154,5 +154,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
-
 
