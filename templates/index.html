@@ -91,7 +91,8 @@
             background-color: #e65c00;
         }
 
-        .tv-choice-grid {
+        .tv-choice-grid,
+        .merk-choice-grid {
             display: none;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -99,13 +100,14 @@
             margin-top: 20px;
         }
 
-        .tv-choice {
+        .tv-choice, .merk-choice {
             flex: 1 1 calc(48% - 10px);
             text-align: center;
             cursor: pointer;
         }
 
-        .tv-choice:hover {
+        .tv-choice:hover,
+        .merk-choice:hover {
             transform: scale(1.02);
             transition: transform 0.2s ease;
         }
@@ -115,13 +117,13 @@
             border-radius: 10px;
         }
 
-        .tv-choice div {
+        .tv-choice div, .merk-choice div {
             margin-top: 8px;
             font-weight: bold;
         }
 
         @media (max-width: 600px) {
-            .tv-choice {
+            .tv-choice, .merk-choice {
                 flex: 1 1 100%;
             }
         }
@@ -138,6 +140,7 @@
             <strong>🤖 Expert AI:</strong>
             <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie. Typ gerust je antwoord of klik op een optie zodra we beginnen!</p>
         </div>
+
         <div class="tv-choice-grid" id="tv-options">
             <div class="tv-choice" data-value="Films en series">
                 <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
@@ -160,6 +163,14 @@
                 <div>Combinatie van meerdere</div>
             </div>
         </div>
+
+        <div class="merk-choice-grid" id="merk-options">
+            {% for merk in merken %}
+            <div class="merk-choice" data-value="{{ merk }}">
+                <div>{{ merk }}</div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <form id="chat-form">
@@ -172,6 +183,7 @@
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
         const tvOptions = document.getElementById("tv-options");
+        const merkOptions = document.getElementById("merk-options");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -199,18 +211,22 @@
 
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Toon de tv opties wanneer de eerste vraag wordt gesteld
             if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
                 tvOptions.style.display = "flex";
             }
+
+            if (data.assistant && data.assistant.toLowerCase().includes("voorkeur voor een merk")) {
+                merkOptions.style.display = "flex";
+            }
         });
 
-        document.querySelectorAll(".tv-choice").forEach(choice => {
+        document.querySelectorAll(".tv-choice, .merk-choice").forEach(choice => {
             choice.addEventListener("click", () => {
                 const selected = choice.getAttribute("data-value");
                 input.value = selected;
                 form.dispatchEvent(new Event("submit"));
                 tvOptions.style.display = "none";
+                merkOptions.style.display = "none";
             });
         });
     </script>
