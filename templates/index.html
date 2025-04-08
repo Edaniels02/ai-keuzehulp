@@ -101,15 +101,15 @@
         }
 
         .tv-choice-grid {
-            display: flex;
+            display: none;
             flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 15px;
+            justify-content: center;
+            gap: 10px;
             margin-top: 20px;
         }
 
         .tv-choice {
-            flex: 1 1 45%;
+            width: 130px;
             text-align: center;
             border: 1px solid #ddd;
             border-radius: 10px;
@@ -128,11 +128,12 @@
         .tv-choice div {
             margin-top: 6px;
             font-weight: bold;
+            font-size: 14px;
         }
 
         @media (max-width: 600px) {
             .tv-choice {
-                flex: 1 1 100%;
+                flex: 1 1 45%;
             }
         }
     </style>
@@ -183,6 +184,7 @@
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
         const tvOptions = document.getElementById("tv-options");
+        let hasAnsweredIntro = false;
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -210,7 +212,8 @@
 
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
+            if (!hasAnsweredIntro && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
+                hasAnsweredIntro = true;
                 tvOptions.style.display = "flex";
             } else {
                 tvOptions.style.display = "none";
