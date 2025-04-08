@@ -11,7 +11,6 @@
             margin: 0;
             padding: 0;
         }
-
         header {
             display: flex;
             flex-direction: column;
@@ -20,18 +19,15 @@
             padding: 15px 0;
             border-bottom: 2px solid #ff6600;
         }
-
         header img {
             height: 50px;
             margin-bottom: 5px;
         }
-
         header h1 {
             color: #003366;
             font-size: 28px;
             margin: 0;
         }
-
         .chat-container {
             max-width: 800px;
             margin: 40px auto;
@@ -40,26 +36,21 @@
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
         .message {
             margin: 10px 0;
             line-height: 1.6;
             white-space: pre-line;
         }
-
         .user {
             font-weight: bold;
             color: #333;
         }
-
         .assistant {
             color: #000;
         }
-
         .assistant strong {
             color: #ff6600;
         }
-
         form {
             display: flex;
             margin-top: 20px;
@@ -67,7 +58,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-
         input[type="text"] {
             flex: 1;
             padding: 12px;
@@ -75,7 +65,6 @@
             border: 1px solid #ccc;
             border-radius: 6px;
         }
-
         button {
             background-color: #ff6600;
             color: white;
@@ -86,66 +75,33 @@
             border-radius: 6px;
             cursor: pointer;
         }
-
         button:hover {
             background-color: #e65c00;
         }
-
-        .intro-text {
-            font-size: 26px;
-            color: #ff6600;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .intro-image {
-            max-width: 100%;
-            margin-top: 5px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-        }
-
-        .assistant p {
-            margin: 4px 0;
-        }
-
         .tv-choice-grid {
-            display: flex;
+            display: none;
             flex-wrap: wrap;
             justify-content: space-between;
             gap: 15px;
             margin-top: 20px;
         }
-
         .tv-choice {
             flex: 1 1 calc(48% - 10px);
             text-align: center;
             cursor: pointer;
         }
-
-        .tv-choice:hover {
-            transform: scale(1.02);
-            transition: transform 0.2s ease;
-        }
-
         .tv-choice img {
             width: 100%;
             border-radius: 10px;
         }
-
         .tv-choice div {
             margin-top: 8px;
             font-weight: bold;
         }
-
         @media (max-width: 600px) {
             .tv-choice {
                 flex: 1 1 100%;
             }
-        }
-
-        #tv-options {
-            display: none;
         }
     </style>
 </head>
@@ -157,40 +113,35 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
-            <div class="intro-text">Welkom bij de Expert AI keuzehulp!</div>
-            <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV overzicht" class="intro-image">
-            <p><strong>🤖 Expert AI:</strong></p>
+            <strong>🤖 Expert AI:</strong>
             <p>Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?</p>
         </div>
-
-        <div id="tv-options">
-            <div class="tv-choice-grid">
-                <div class="tv-choice" data-value="Films en series">
-                    <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
-                    <div>Films en series</div>
-                </div>
-                <div class="tv-choice" data-value="Sport">
-                    <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
-                    <div>Sport</div>
-                </div>
-                <div class="tv-choice" data-value="Gamen">
-                    <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
-                    <div>Gamen</div>
-                </div>
-                <div class="tv-choice" data-value="Dagelijks tv-kijken">
-                    <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
-                    <div>Dagelijks tv-kijken</div>
-                </div>
-                <div class="tv-choice" data-value="Combinatie van meerdere">
-                    <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
-                    <div>Combinatie van meerdere</div>
-                </div>
+        <div class="tv-choice-grid" id="tv-options">
+            <div class="tv-choice" data-value="Films en series">
+                <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
+                <div>Films en series</div>
+            </div>
+            <div class="tv-choice" data-value="Sport">
+                <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
+                <div>Sport</div>
+            </div>
+            <div class="tv-choice" data-value="Gamen">
+                <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
+                <div>Gamen</div>
+            </div>
+            <div class="tv-choice" data-value="Dagelijks tv-kijken">
+                <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
+                <div>Dagelijks tv-kijken</div>
+            </div>
+            <div class="tv-choice" data-value="Combinatie van meerdere">
+                <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
+                <div>Combinatie van meerdere</div>
             </div>
         </div>
     </div>
 
     <form id="chat-form">
-        <input type="text" id="user-input" placeholder="Typ je vraag of voorkeur..." required>
+        <input type="text" id="user-input" placeholder="Typ je antwoord..." required>
         <button type="submit">Verstuur</button>
     </form>
 
@@ -224,20 +175,19 @@
             assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
             chatBox.appendChild(assistantMessage);
 
-            // Laat opties met foto's zien bij relevante vraag
-            if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv gebruiken")) {
-                tvOptions.style.display = "block";
+            if (data.assistant.includes("waarvoor je de tv voornamelijk gebruiken")) {
+                tvOptions.style.display = "flex";
             }
 
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 
-        // Klik op afbeelding = antwoord verzenden
         document.querySelectorAll(".tv-choice").forEach(choice => {
             choice.addEventListener("click", () => {
                 const selected = choice.getAttribute("data-value");
                 input.value = selected;
                 form.dispatchEvent(new Event("submit"));
+                tvOptions.style.display = "none";
             });
         });
     </script>
