@@ -119,7 +119,7 @@
         }
 
         .tv-choice-grid {
-            display: none; /* verberg standaard */
+            display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             gap: 15px;
@@ -152,6 +152,10 @@
                 flex: 1 1 100%;
             }
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -168,7 +172,7 @@
             <p>Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?</p>
         </div>
 
-        <div class="tv-choice-grid" id="tv-options">
+        <div id="tv-choice-block" class="tv-choice-grid hidden">
             <div class="tv-choice" data-value="Films en series">
                 <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
                 <div>Films en series 🎬</div>
@@ -201,7 +205,7 @@
         const chatBox = document.getElementById("chat-box");
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
-        const tvOptions = document.getElementById("tv-options");
+        const tvChoiceBlock = document.getElementById("tv-choice-block");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -227,13 +231,12 @@
             assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
             chatBox.appendChild(assistantMessage);
 
-            // Toon tv-opties na positieve intentie zoals "ja", "oké", "prima"
-            const lowerText = userText.toLowerCase();
-            if (lowerText.includes("ja") || lowerText.includes("ok") || lowerText.includes("prima")) {
-                tvOptions.style.display = "flex";
-            }
-
             chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Toon de tv-keuze opties na eerste akkoord
+            if (userText.toLowerCase().includes("ja") || userText.toLowerCase().includes("graag")) {
+                tvChoiceBlock.classList.remove("hidden");
+            }
         });
 
         // Keuze via afbeelding aanklikken
@@ -247,3 +250,4 @@
     </script>
 </body>
 </html>
+
