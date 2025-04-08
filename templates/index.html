@@ -119,10 +119,11 @@
         }
 
         .tv-choice-grid {
-            display: flex;
+            display: none; /* verberg standaard */
             flex-wrap: wrap;
             justify-content: space-between;
             gap: 15px;
+            margin-top: 20px;
         }
 
         .tv-choice {
@@ -165,27 +166,28 @@
             <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV overzicht" class="intro-image">
             <p><strong>🤖 Expert AI:</strong></p>
             <p>Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?</p>
-            <div class="tv-choice-grid">
-                <div class="tv-choice" data-value="Films en series">
-                    <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
-                    <div>Films en series 🎬</div>
-                </div>
-                <div class="tv-choice" data-value="Sport">
-                    <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
-                    <div>Sport ⚽</div>
-                </div>
-                <div class="tv-choice" data-value="Gamen">
-                    <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
-                    <div>Gamen 🎮</div>
-                </div>
-                <div class="tv-choice" data-value="Dagelijks tv-kijken">
-                    <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
-                    <div>Dagelijks tv-kijken 📺</div>
-                </div>
-                <div class="tv-choice" data-value="Combinatie van meerdere">
-                    <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
-                    <div>Combinatie van meerdere 🤹</div>
-                </div>
+        </div>
+
+        <div class="tv-choice-grid" id="tv-options">
+            <div class="tv-choice" data-value="Films en series">
+                <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
+                <div>Films en series 🎬</div>
+            </div>
+            <div class="tv-choice" data-value="Sport">
+                <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
+                <div>Sport ⚽</div>
+            </div>
+            <div class="tv-choice" data-value="Gamen">
+                <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
+                <div>Gamen 🎮</div>
+            </div>
+            <div class="tv-choice" data-value="Dagelijks tv-kijken">
+                <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
+                <div>Dagelijks tv-kijken 📺</div>
+            </div>
+            <div class="tv-choice" data-value="Combinatie van meerdere">
+                <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
+                <div>Combinatie van meerdere 🤹</div>
             </div>
         </div>
     </div>
@@ -199,6 +201,7 @@
         const chatBox = document.getElementById("chat-box");
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
+        const tvOptions = document.getElementById("tv-options");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -224,6 +227,12 @@
             assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
             chatBox.appendChild(assistantMessage);
 
+            // Toon tv-opties na positieve intentie zoals "ja", "oké", "prima"
+            const lowerText = userText.toLowerCase();
+            if (lowerText.includes("ja") || lowerText.includes("ok") || lowerText.includes("prima")) {
+                tvOptions.style.display = "flex";
+            }
+
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 
@@ -238,4 +247,3 @@
     </script>
 </body>
 </html>
-
