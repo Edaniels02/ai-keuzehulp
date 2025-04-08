@@ -91,8 +91,7 @@
             background-color: #e65c00;
         }
 
-        .tv-choice-grid,
-        .merk-choice-grid {
+        .tv-choice-grid {
             display: none;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -100,136 +99,125 @@
             margin-top: 20px;
         }
 
-        .tv-choice, .merk-choice {
+        .tv-choice {
             flex: 1 1 calc(48% - 10px);
             text-align: center;
             cursor: pointer;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
-        .tv-choice:hover,
-        .merk-choice:hover {
+        .tv-choice:hover {
             transform: scale(1.02);
             transition: transform 0.2s ease;
         }
 
         .tv-choice img {
-            width: 100%;
+            max-width: 100%;
+            height: auto;
             border-radius: 10px;
         }
 
-        .tv-choice div, .merk-choice div {
-            margin-top: 8px;
+        .tv-choice div {
+            margin-top: 10px;
             font-weight: bold;
         }
 
         @media (max-width: 600px) {
-            .tv-choice, .merk-choice {
+            .tv-choice {
                 flex: 1 1 100%;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <img src="{{ url_for('static', filename='logo_expert.png') }}" alt="Expert logo">
-        <h1>Expert AI Keuzehulp</h1>
-    </header>
+<header>
+    <img src="{{ url_for('static', filename='logo_expert.png') }}" alt="Expert logo">
+    <h1>Expert AI Keuzehulp</h1>
+</header>
 
-    <div class="chat-container" id="chat-box">
-        <div class="message assistant">
-            <strong>🤖 Expert AI:</strong>
-            <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie. Typ gerust je antwoord of klik op een optie zodra we beginnen!</p>
+<div class="chat-container" id="chat-box">
+    <div class="message assistant">
+        <strong>🤖 Expert AI:</strong>
+        <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br>> Zullen we beginnen?</p>
+    </div>
+    <div class="tv-choice-grid" id="tv-options">
+        <div class="tv-choice" data-value="Films en series">
+            <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
+            <div>Films en series</div>
         </div>
-
-        <div class="tv-choice-grid" id="tv-options">
-            <div class="tv-choice" data-value="Films en series">
-                <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
-                <div>Films en series</div>
-            </div>
-            <div class="tv-choice" data-value="Sport">
-                <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
-                <div>Sport</div>
-            </div>
-            <div class="tv-choice" data-value="Gamen">
-                <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
-                <div>Gamen</div>
-            </div>
-            <div class="tv-choice" data-value="Dagelijks tv-kijken">
-                <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
-                <div>Dagelijks tv-kijken</div>
-            </div>
-            <div class="tv-choice" data-value="Combinatie van meerdere">
-                <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
-                <div>Combinatie van meerdere</div>
-            </div>
+        <div class="tv-choice" data-value="Sport">
+            <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
+            <div>Sport</div>
         </div>
-
-        <div class="merk-choice-grid" id="merk-options">
-            {% for merk in merken %}
-            <div class="merk-choice" data-value="{{ merk }}">
-                <div>{{ merk }}</div>
-            </div>
-            {% endfor %}
+        <div class="tv-choice" data-value="Gamen">
+            <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
+            <div>Gamen</div>
+        </div>
+        <div class="tv-choice" data-value="Dagelijks tv-kijken">
+            <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
+            <div>Dagelijks tv-kijken</div>
+        </div>
+        <div class="tv-choice" data-value="Combinatie van meerdere">
+            <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
+            <div>Combinatie van meerdere</div>
         </div>
     </div>
+</div>
 
-    <form id="chat-form">
-        <input type="text" id="user-input" placeholder="Typ je antwoord..." required>
-        <button type="submit">Verstuur</button>
-    </form>
+<form id="chat-form">
+    <input type="text" id="user-input" placeholder="Typ je antwoord..." required>
+    <button type="submit">Verstuur</button>
+</form>
 
-    <script>
-        const chatBox = document.getElementById("chat-box");
-        const form = document.getElementById("chat-form");
-        const input = document.getElementById("user-input");
-        const tvOptions = document.getElementById("tv-options");
-        const merkOptions = document.getElementById("merk-options");
+<script>
+    const chatBox = document.getElementById("chat-box");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("user-input");
+    const tvOptions = document.getElementById("tv-options");
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const userText = input.value.trim();
-            if (!userText) return;
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userText = input.value.trim();
+        if (!userText) return;
 
-            const userMessage = document.createElement("div");
-            userMessage.className = "message user";
-            userMessage.innerHTML = "<strong>🧑 Jij:</strong> " + userText;
-            chatBox.appendChild(userMessage);
+        const userMessage = document.createElement("div");
+        userMessage.className = "message user";
+        userMessage.innerHTML = "<strong>🧑 Jij:</strong> " + userText;
+        chatBox.appendChild(userMessage);
 
-            input.value = "";
+        input.value = "";
 
-            const response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userText })
-            });
-
-            const data = await response.json();
-            const assistantMessage = document.createElement("div");
-            assistantMessage.className = "message assistant";
-            assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
-            chatBox.appendChild(assistantMessage);
-
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
-                tvOptions.style.display = "flex";
-            }
-
-            if (data.assistant && data.assistant.toLowerCase().includes("voorkeur voor een merk")) {
-                merkOptions.style.display = "flex";
-            }
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userText })
         });
 
-        document.querySelectorAll(".tv-choice, .merk-choice").forEach(choice => {
-            choice.addEventListener("click", () => {
-                const selected = choice.getAttribute("data-value");
-                input.value = selected;
-                form.dispatchEvent(new Event("submit"));
-                tvOptions.style.display = "none";
-                merkOptions.style.display = "none";
-            });
+        const data = await response.json();
+        const assistantMessage = document.createElement("div");
+        assistantMessage.className = "message assistant";
+        assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
+        chatBox.appendChild(assistantMessage);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        if (data.assistant && data.assistant.toLowerCase().includes("waar zou je de tv voornamelijk voor gaan gebruiken")) {
+            tvOptions.style.display = "flex";
+        }
+    });
+
+    document.querySelectorAll(".tv-choice").forEach(choice => {
+        choice.addEventListener("click", () => {
+            const selected = choice.getAttribute("data-value");
+            input.value = selected;
+            form.dispatchEvent(new Event("submit"));
+            tvOptions.style.display = "none";
         });
-    </script>
+    });
+</script>
 </body>
 </html>
 
