@@ -91,15 +91,6 @@
             background-color: #e65c00;
         }
 
-        ul {
-            padding-left: 20px;
-            margin: 0;
-        }
-
-        ul li {
-            margin-bottom: 2px;
-        }
-
         .intro-text {
             font-size: 26px;
             color: #ff6600;
@@ -153,7 +144,7 @@
             }
         }
 
-        .hidden {
+        #tv-options {
             display: none;
         }
     </style>
@@ -172,26 +163,28 @@
             <p>Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?</p>
         </div>
 
-        <div id="tv-choice-block" class="tv-choice-grid hidden">
-            <div class="tv-choice" data-value="Films en series">
-                <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
-                <div>Films en series 🎬</div>
-            </div>
-            <div class="tv-choice" data-value="Sport">
-                <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
-                <div>Sport ⚽</div>
-            </div>
-            <div class="tv-choice" data-value="Gamen">
-                <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
-                <div>Gamen 🎮</div>
-            </div>
-            <div class="tv-choice" data-value="Dagelijks tv-kijken">
-                <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
-                <div>Dagelijks tv-kijken 📺</div>
-            </div>
-            <div class="tv-choice" data-value="Combinatie van meerdere">
-                <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
-                <div>Combinatie van meerdere 🤹</div>
+        <div id="tv-options">
+            <div class="tv-choice-grid">
+                <div class="tv-choice" data-value="Films en series">
+                    <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
+                    <div>Films en series</div>
+                </div>
+                <div class="tv-choice" data-value="Sport">
+                    <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
+                    <div>Sport</div>
+                </div>
+                <div class="tv-choice" data-value="Gamen">
+                    <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
+                    <div>Gamen</div>
+                </div>
+                <div class="tv-choice" data-value="Dagelijks tv-kijken">
+                    <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
+                    <div>Dagelijks tv-kijken</div>
+                </div>
+                <div class="tv-choice" data-value="Combinatie van meerdere">
+                    <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
+                    <div>Combinatie van meerdere</div>
+                </div>
             </div>
         </div>
     </div>
@@ -205,7 +198,7 @@
         const chatBox = document.getElementById("chat-box");
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
-        const tvChoiceBlock = document.getElementById("tv-choice-block");
+        const tvOptions = document.getElementById("tv-options");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -231,15 +224,15 @@
             assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
             chatBox.appendChild(assistantMessage);
 
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            // Toon de tv-keuze opties na eerste akkoord
-            if (userText.toLowerCase().includes("ja") || userText.toLowerCase().includes("graag")) {
-                tvChoiceBlock.classList.remove("hidden");
+            // Laat opties met foto's zien bij relevante vraag
+            if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv gebruiken")) {
+                tvOptions.style.display = "block";
             }
+
+            chatBox.scrollTop = chatBox.scrollHeight;
         });
 
-        // Keuze via afbeelding aanklikken
+        // Klik op afbeelding = antwoord verzenden
         document.querySelectorAll(".tv-choice").forEach(choice => {
             choice.addEventListener("click", () => {
                 const selected = choice.getAttribute("data-value");
