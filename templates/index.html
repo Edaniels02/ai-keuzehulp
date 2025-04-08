@@ -117,6 +117,40 @@
         .assistant p {
             margin: 4px 0;
         }
+
+        .tv-choice-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .tv-choice {
+            flex: 1 1 calc(48% - 10px);
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .tv-choice:hover {
+            transform: scale(1.02);
+            transition: transform 0.2s ease;
+        }
+
+        .tv-choice img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .tv-choice div {
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .tv-choice {
+                flex: 1 1 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -131,6 +165,28 @@
             <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV overzicht" class="intro-image">
             <p><strong>🤖 Expert AI:</strong></p>
             <p>Zullen we beginnen met een paar korte vragen om de perfecte televisie voor jou te vinden?</p>
+            <div class="tv-choice-grid">
+                <div class="tv-choice" data-value="Films en series">
+                    <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
+                    <div>Films en series 🎬</div>
+                </div>
+                <div class="tv-choice" data-value="Sport">
+                    <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
+                    <div>Sport ⚽</div>
+                </div>
+                <div class="tv-choice" data-value="Gamen">
+                    <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
+                    <div>Gamen 🎮</div>
+                </div>
+                <div class="tv-choice" data-value="Dagelijks tv-kijken">
+                    <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
+                    <div>Dagelijks tv-kijken 📺</div>
+                </div>
+                <div class="tv-choice" data-value="Combinatie van meerdere">
+                    <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
+                    <div>Combinatie van meerdere 🤹</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -169,6 +225,15 @@
             chatBox.appendChild(assistantMessage);
 
             chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // Keuze via afbeelding aanklikken
+        document.querySelectorAll(".tv-choice").forEach(choice => {
+            choice.addEventListener("click", () => {
+                const selected = choice.getAttribute("data-value");
+                input.value = selected;
+                form.dispatchEvent(new Event("submit"));
+            });
         });
     </script>
 </body>
