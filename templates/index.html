@@ -47,6 +47,15 @@
             white-space: pre-line;
         }
 
+        .message ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .message ul li {
+            margin-bottom: 5px;
+        }
+
         .user {
             font-weight: bold;
             color: #333;
@@ -92,10 +101,10 @@
         }
 
         .tv-choice-grid {
-            display: none;
+            display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 20px;
+            gap: 15px;
             margin-top: 20px;
         }
 
@@ -105,29 +114,32 @@
             cursor: pointer;
             border: 1px solid #ddd;
             border-radius: 10px;
-            padding: 10px;
-            background: #f9f9f9;
-            transition: all 0.2s ease;
+            padding: 8px;
+            background: #fff;
         }
 
         .tv-choice:hover {
-            transform: scale(1.03);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: scale(1.01);
+            transition: transform 0.2s ease;
         }
 
         .tv-choice img {
             width: 100%;
-            max-height: 160px;
+            max-height: 140px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
         .tv-choice div {
-            margin-top: 10px;
+            margin-top: 6px;
             font-weight: bold;
+            font-size: 15px;
         }
 
         @media (max-width: 600px) {
+            body {
+                font-size: 15px;
+            }
             .tv-choice {
                 flex: 1 1 100%;
             }
@@ -143,10 +155,8 @@
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
             <strong>🤖 Expert AI:</strong>
-            <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br>
-            &gt; Zullen we beginnen?</p>
+            <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br>> Zullen we beginnen?</p>
         </div>
-
         <div class="tv-choice-grid" id="tv-options">
             <div class="tv-choice" data-value="Films en series">
                 <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
@@ -208,13 +218,11 @@
 
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Toon tv-opties als AI vraagt waar je de tv voor wilt gebruiken
-            if (data.assistant && /waar.*(tv|televisie).*gebruik/i.test(data.assistant)) {
+            if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
                 tvOptions.style.display = "flex";
             }
         });
 
-        // Klik op visuele tv-opties = automatisch invullen en verzenden
         document.querySelectorAll(".tv-choice").forEach(choice => {
             choice.addEventListener("click", () => {
                 const selected = choice.getAttribute("data-value");
