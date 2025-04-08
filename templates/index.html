@@ -104,12 +104,12 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 10px;
+            gap: 15px;
             margin-top: 20px;
         }
 
         .tv-choice {
-            width: 150px;
+            flex: 1 1 45%;
             text-align: center;
             border: 1px solid #ddd;
             border-radius: 10px;
@@ -119,7 +119,8 @@
 
         .tv-choice img {
             width: 100%;
-            height: 100px;
+            height: auto;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
             border-radius: 8px;
         }
@@ -127,15 +128,11 @@
         .tv-choice div {
             margin-top: 6px;
             font-weight: bold;
-            font-size: 14px;
         }
 
         @media (max-width: 600px) {
-            body {
-                font-size: 16px;
-            }
-            .tv-choice-grid {
-                justify-content: center;
+            .tv-choice {
+                flex: 1 1 100%;
             }
         }
     </style>
@@ -148,13 +145,11 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
+            <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV keuzehulp" style="width:100%; border-radius: 10px; margin-bottom: 15px;">
             <strong>🤖 Expert AI:</strong>
             <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br>> Zullen we beginnen?</p>
         </div>
-        <div class="message assistant">
-            <strong>Waar zou je de tv voornamelijk voor gaan gebruiken?</strong>
-        </div>
-        <div class="tv-choice-grid">
+        <div class="tv-choice-grid" id="tv-options">
             <div class="tv-choice">
                 <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
                 <div>A. Films en series</div>
@@ -176,9 +171,6 @@
                 <div>E. Combinatie van meerdere</div>
             </div>
         </div>
-        <div style="margin-top: 15px; text-align: center;">
-            <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV Keuzehulp" style="max-width:100%; border-radius: 10px;">
-        </div>
     </div>
 
     <form id="chat-form">
@@ -190,6 +182,7 @@
         const chatBox = document.getElementById("chat-box");
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
+        const tvOptions = document.getElementById("tv-options");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -216,8 +209,15 @@
             chatBox.appendChild(assistantMessage);
 
             chatBox.scrollTop = chatBox.scrollHeight;
+
+            if (data.assistant && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
+                tvOptions.style.display = "flex";
+            } else {
+                tvOptions.style.display = "none";
+            }
         });
     </script>
 </body>
 </html>
+
 
