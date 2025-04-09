@@ -101,10 +101,10 @@
         }
 
         .tv-choice-grid {
-            display: flex;
+            display: none;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 15px;
+            gap: 10px;
             margin-top: 10px;
         }
 
@@ -113,7 +113,7 @@
             text-align: center;
             border: 1px solid #ddd;
             border-radius: 10px;
-            padding: 10px;
+            padding: 6px;
             background: #fff;
         }
 
@@ -126,8 +126,9 @@
         }
 
         .tv-choice div {
-            margin-top: 6px;
+            margin-top: 4px;
             font-weight: bold;
+            font-size: 14px;
         }
 
         @media (max-width: 600px) {
@@ -158,27 +159,27 @@
         <div class="message assistant" id="tv-question" style="display:none;">
             <strong><img src="{{ url_for('static', filename='Expert logo 1.png') }}" class="icon"> Expert AI:</strong>
             <p>Vraag 1: Waarvoor wil je de TV voornamelijk gebruiken? Is het voor films en series, sport, gamen, dagelijks tv-kijken of een combinatie van meerdere?</p>
-        </div>
-        <div class="tv-choice-grid" id="tv-options" style="display:none;">
-            <div class="tv-choice">
-                <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
-                <div>A. Films en series</div>
-            </div>
-            <div class="tv-choice">
-                <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
-                <div>B. Sport</div>
-            </div>
-            <div class="tv-choice">
-                <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
-                <div>C. Gamen</div>
-            </div>
-            <div class="tv-choice">
-                <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
-                <div>D. Dagelijks tv-kijken</div>
-            </div>
-            <div class="tv-choice">
-                <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
-                <div>E. Combinatie van meerdere</div>
+            <div class="tv-choice-grid" id="tv-options">
+                <div class="tv-choice">
+                    <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
+                    <div>A. Films en series</div>
+                </div>
+                <div class="tv-choice">
+                    <img src="{{ url_for('static', filename='Sport_expert.png') }}" alt="Sport">
+                    <div>B. Sport</div>
+                </div>
+                <div class="tv-choice">
+                    <img src="{{ url_for('static', filename='Gamen_expert.png') }}" alt="Gamen">
+                    <div>C. Gamen</div>
+                </div>
+                <div class="tv-choice">
+                    <img src="{{ url_for('static', filename='Dagelijks_expert.png') }}" alt="Dagelijks tv-kijken">
+                    <div>D. Dagelijks tv-kijken</div>
+                </div>
+                <div class="tv-choice">
+                    <img src="{{ url_for('static', filename='Gecombineerd_expert.png') }}" alt="Combinatie van meerdere">
+                    <div>E. Combinatie van meerdere</div>
+                </div>
             </div>
         </div>
     </div>
@@ -223,7 +224,7 @@
 
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (!hasWelcomed) {
+            if (!hasWelcomed && userText.toLowerCase().includes("ja")) {
                 tvQuestion.style.display = "block";
                 tvOptions.style.display = "flex";
                 hasWelcomed = true;
@@ -232,5 +233,4 @@
     </script>
 </body>
 </html>
-
 
