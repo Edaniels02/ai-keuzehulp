@@ -101,15 +101,15 @@
         }
 
         .tv-choice-grid {
-            display: none;
+            display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 10px;
         }
 
         .tv-choice {
-            width: 130px;
+            flex: 1 1 18%;
             text-align: center;
             border: 1px solid #ddd;
             border-radius: 10px;
@@ -128,13 +128,18 @@
         .tv-choice div {
             margin-top: 6px;
             font-weight: bold;
-            font-size: 14px;
         }
 
         @media (max-width: 600px) {
             .tv-choice {
-                flex: 1 1 45%;
+                flex: 1 1 48%;
             }
+        }
+
+        .icon {
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -147,10 +152,14 @@
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
             <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV keuzehulp" style="width:100%; border-radius: 10px; margin-bottom: 15px;">
-            <strong>🤖 Expert AI:</strong>
+            <strong><img src="{{ url_for('static', filename='Expert logo 1.png') }}" class="icon"> Expert AI:</strong>
             <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br>> Zullen we beginnen?</p>
         </div>
-        <div class="tv-choice-grid" id="tv-options">
+        <div class="message assistant" id="tv-question" style="display:none;">
+            <strong><img src="{{ url_for('static', filename='Expert logo 1.png') }}" class="icon"> Expert AI:</strong>
+            <p>Vraag 1: Waarvoor wil je de TV voornamelijk gebruiken? Is het voor films en series, sport, gamen, dagelijks tv-kijken of een combinatie van meerdere?</p>
+        </div>
+        <div class="tv-choice-grid" id="tv-options" style="display:none;">
             <div class="tv-choice">
                 <img src="{{ url_for('static', filename='Films_series_expert.png') }}" alt="Films en series">
                 <div>A. Films en series</div>
@@ -184,7 +193,9 @@
         const form = document.getElementById("chat-form");
         const input = document.getElementById("user-input");
         const tvOptions = document.getElementById("tv-options");
-        let hasAnsweredIntro = false;
+        const tvQuestion = document.getElementById("tv-question");
+
+        let hasWelcomed = false;
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -193,7 +204,7 @@
 
             const userMessage = document.createElement("div");
             userMessage.className = "message user";
-            userMessage.innerHTML = "<strong>🧑 Jij:</strong> " + userText;
+            userMessage.innerHTML = `<strong><img src="/static/icoon_gebruiker.png" class="icon"> Jij:</strong> ${userText}`;
             chatBox.appendChild(userMessage);
 
             input.value = "";
@@ -207,16 +218,15 @@
             const data = await response.json();
             const assistantMessage = document.createElement("div");
             assistantMessage.className = "message assistant";
-            assistantMessage.innerHTML = "<strong>🤖 Expert AI:</strong> " + (data.assistant || data.error || "Geen antwoord ontvangen.");
+            assistantMessage.innerHTML = `<strong><img src="/static/Expert logo 1.png" class="icon"> Expert AI:</strong> ${data.assistant || data.error || "Geen antwoord ontvangen."}`;
             chatBox.appendChild(assistantMessage);
 
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (!hasAnsweredIntro && data.assistant.toLowerCase().includes("waarvoor wil je de tv")) {
-                hasAnsweredIntro = true;
+            if (!hasWelcomed) {
+                tvQuestion.style.display = "block";
                 tvOptions.style.display = "flex";
-            } else {
-                tvOptions.style.display = "none";
+                hasWelcomed = true;
             }
         });
     </script>
