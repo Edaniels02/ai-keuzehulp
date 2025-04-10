@@ -1,7 +1,7 @@
 import os
 import logging
 import pandas as pd
-from flask import Flask, request, jsonify, render_template, send_from_directory, session
+from flask import Flask, request, jsonify, render_template, send_from_directory, session, redirect, url_for
 from flask_cors import CORS
 from openai import OpenAI
 
@@ -32,12 +32,16 @@ system_prompt = (
     "Wees behulpzaam, nieuwsgierig, positief en een tikje luchtig."
 
     "\n\nWerkwijze:\n"
-    "- Stel steeds één duidelijke vraag.\n"
-    "- Reageer op eerdere antwoorden en bouw daar logisch op verder.\n"
-    "- Antwoord op een manier die natuurlijk voelt: alsof je een gesprek voert, niet een lijstje afwerkt.\n"
-    "- Gebruik opsommingen waar dat helpt om structuur te bieden.\n"
-    "- Gebruik emoji's alleen wanneer het helpt om een emotie te verduidelijken.\n"
-    "- Vat elk antwoord vriendelijk samen, zodat duidelijk is dat je het goed hebt begrepen."
+    "• Stel steeds één duidelijke vraag.\n"
+    "• Reageer op eerdere antwoorden en bouw daar logisch op verder.\n"
+    "• Analyseer voorgaande vragen en antwoorden en anticipeer bij het stellen van de volgende vraag.\n"
+    "• Voorkom het tonen van opties die niet meer van toepassing zijn op basis van eerdere antwoorden.\n"
+    "• Raadpleeg zonodig de productfeed voor beschikbare opties.\n"
+    "• Onthoud alle communicatie uit de sessie en houd hier rekening mee in het gesprek.\n"
+    "• Antwoord op een manier die natuurlijk voelt: alsof je een gesprek voert, niet een lijstje afwerkt.\n"
+    "• Gebruik opsommingen waar dat helpt om structuur te bieden (gebruik altijd puntjes als bullets, geen '-').\n"
+    "• Gebruik emoji's alleen wanneer het helpt om een emotie te verduidelijken.\n"
+    "• Vat elk antwoord vriendelijk samen, zodat duidelijk is dat je het goed hebt begrepen."
 
     "\n\nVragenstructuur:\n"
     "1. Waarvoor wil je de TV gebruiken?\n"
@@ -56,6 +60,7 @@ system_prompt = (
     "3. Heb je een voorkeur voor een merk?\n"
     f"{merk_opties}\n"
     "• Z: Geen voorkeur\n"
+    "(Geef altijd alle televisiemerken weer op volgorde van populariteit, gebaseerd op de productfeed.)\n"
     "4. Welk formaat zoek je?\n"
     "• 43\"\n"
     "• 50\"\n"
@@ -75,34 +80,59 @@ system_prompt = (
     "• Chromecast\n"
     "• Geen voorkeur\n"
 
+    "\n\nProductadvies:\n"
+    "• Genereer, wanneer mogelijk, drie televisiemodellen die passen bij de wensen van de klant.\n"
+    "• Geef bij elk model aan waarom dit goed past.\n"
+    "• Vermeld prijs en beschikbaarheid.\n"
+
     "\n\nAccessoire-advies:\n"
-    "- Als de klant een muurbeugel of accessoire noemt, filter op formaat, bevestigingstype en VESA-maat.\n"
-    "- Toon maximaal 2 suggesties met prijs en klikbare link als beschikbaar."
+    "• Vraag na het tonen van tv-keuzes naar accessoires.\n"
+    "• Probeer een muurbeugel, kabel of vergelijkbaar extra product te adviseren.\n"
+    "• Geef maximaal twee suggesties per type accessoire (bijv. twee muurbeugels, twee kabels, etc.).\n"
+    "• Toon de accessoires met korte uitleg en klikbare link indien beschikbaar."
 
     "\n\nOpeningsvraag:\n"
     "Zullen we samen even door een paar vragen lopen om de perfecte tv voor jou te vinden?\n"
-    "- Als de klant akkoord gaat, begin dan meteen vriendelijk en met energie aan vraag 1.\n"
-    "- Bij twijfel: stel gerust, en bied aan om alsnog samen te kijken."
+    "• Als de klant akkoord gaat, begin dan meteen vriendelijk en met energie aan vraag 1.\n"
+    "• Bij twijfel: stel gerust, en bied aan om alsnog samen te kijken."
 
     "\n\nProductcatalogus gebruik:\n"
-    "- Gebruik alleen tv’s uit de catalogus die binnen het opgegeven budget passen.\n"
-    "- Gebruik merk, formaat en features om keuzes te filteren.\n"
-    "- Vermeld kort prijs en waarom een model goed past.\n"
-    "- Zeg het erbij als iets niet op voorraad is en stel een alternatief voor."
+    "• Gebruik alleen tv’s uit de catalogus die binnen het opgegeven budget passen.\n"
+    "• Gebruik merk, formaat en features om keuzes te filteren.\n"
+    "• Zeg het erbij als iets niet op voorraad is en stel een alternatief voor."
 
     "\n\nLet op:\n"
-    "- Herhaal geen vragen die al beantwoord zijn.\n"
-    "- Vraag bij twijfel of iemand terug wil naar een vorige stap.\n"
-    "- Geef geen negatieve uitspraken over merken of concurrenten.\n"
-    "- Gebruik emoji’s alleen als het helpt om een gevoel of nuance duidelijk te maken."
+    "• Herhaal geen vragen die al beantwoord zijn.\n"
+    "• Vraag bij twijfel of iemand terug wil naar een vorige stap.\n"
+    "• Geef geen negatieve uitspraken over merken of concurrenten.\n"
+    "• Gebruik emoji’s alleen als het helpt om een gevoel of nuance duidelijk te maken."
 )
 
 @app.route("/")
 def home():
-    return "AI Keuzehulp is actief."
+    return redirect("/login")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    from flask import request
+    if request.method == "POST":
+        if request.form.get("password") == "281617":
+            session["authenticated"] = True
+            return redirect("/keuzehulp")
+        return "Wachtwoord onjuist. Probeer opnieuw."
+    return '''
+        <form method="post">
+            <h2>Expert Keuzehulp</h2>
+            <label>Wachtwoord:</label>
+            <input type="password" name="password">
+            <input type="submit" value="Inloggen">
+        </form>
+    '''
 
 @app.route("/keuzehulp")
 def keuzehulp():
+    if not session.get("authenticated"):
+        return redirect("/login")
     session.clear()
     session['messages'] = [{"role": "system", "content": system_prompt}]
     return render_template("index.html")
@@ -142,6 +172,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
-
-
 
