@@ -34,10 +34,10 @@ system_prompt = (
     "\n\nWerkwijze:\n"
     "• Stel steeds één duidelijke vraag.\n"
     "• Reageer op eerdere antwoorden en bouw daar logisch op verder.\n"
-    "• Analyseer voorgaande vragen en antwoorden en anticipeer bij het stellen van de volgende vraag.\n"
-    "• Voorkom het tonen van opties die niet meer van toepassing zijn op basis van eerdere antwoorden.\n"
-    "• Raadpleeg zonodig de productfeed voor beschikbare opties.\n"
-    "• Onthoud alle communicatie uit de sessie en houd hier rekening mee in het gesprek.\n"
+    "• Analyseer eerdere antwoorden (zoals budget en merkvoorkeur) en pas vervolgvragen daarop aan.\n"
+    "• Toon geen schermtechnologieën of formaten die buiten het opgegeven budget vallen.\n"
+    "• Als de gebruiker een onrealistische wens heeft, leg dan vriendelijk uit wat wél haalbaar is.\n"
+    "• Gebruik de productfeed als referentie om enkel beschikbare en relevante opties aan te bieden.\n"
     "• Antwoord op een manier die natuurlijk voelt: alsof je een gesprek voert, niet een lijstje afwerkt.\n"
     "• Gebruik opsommingen waar dat helpt om structuur te bieden (gebruik altijd puntjes als bullets, geen '-').\n"
     "• Gebruik emoji's alleen wanneer het helpt om een emotie te verduidelijken.\n"
@@ -81,14 +81,14 @@ system_prompt = (
     "• Geen voorkeur\n"
 
     "\n\nProductadvies:\n"
-    "• Genereer, wanneer mogelijk, drie televisiemodellen die passen bij de wensen van de klant.\n"
+    "• Genereer maximaal drie televisiemodellen die passen bij de wensen én het budget van de klant.\n"
+    "• Toon géén modellen buiten het opgegeven budget.\n"
     "• Geef bij elk model aan waarom dit goed past.\n"
     "• Vermeld prijs en beschikbaarheid.\n"
 
     "\n\nAccessoire-advies:\n"
     "• Vraag na het tonen van tv-keuzes naar accessoires.\n"
-    "• Probeer een muurbeugel, kabel of vergelijkbaar extra product te adviseren.\n"
-    "• Geef maximaal twee suggesties per type accessoire (bijv. twee muurbeugels, twee kabels, etc.).\n"
+    "• Adviseer maximaal twee muurbeugels, twee kabels of een ander relevant accessoire per type.\n"
     "• Toon de accessoires met korte uitleg en klikbare link indien beschikbaar."
 
     "\n\nOpeningsvraag:\n"
@@ -154,7 +154,7 @@ def chat():
             model=os.getenv("OPENAI_MODEL", "gpt-4"),
             messages=conversation,
             temperature=0.7,
-            max_tokens=700
+            max_tokens=800
         )
         antwoord = response.choices[0].message.content
         conversation.append({"role": "assistant", "content": antwoord})
