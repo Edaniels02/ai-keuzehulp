@@ -12,6 +12,15 @@
             background-color: #f6f6f6;
             margin: 0;
             padding: 0;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                font-size: 18px;
+            }
         }
 
         header {
@@ -19,18 +28,18 @@
             flex-direction: column;
             align-items: center;
             background-color: #fff;
-            padding: 15px 0;
+            padding: 20px 0;
             border-bottom: 2px solid #ff6600;
         }
 
         header img {
-            height: 50px;
-            margin-bottom: 5px;
+            height: 60px;
+            margin-bottom: 8px;
         }
 
         header h1 {
             color: #003366;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 600;
             margin: 0;
         }
@@ -39,30 +48,19 @@
             max-width: 800px;
             margin: 30px auto;
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .message {
-            margin: 15px 0;
-            line-height: 1.6;
+            margin: 20px 0;
             white-space: pre-line;
-        }
-
-        .message ul {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin: 10px 0;
-        }
-
-        .message ul li {
-            margin-bottom: 8px;
         }
 
         .user {
             font-weight: 600;
-            color: #333;
+            color: #003366;
         }
 
         .assistant {
@@ -73,29 +71,40 @@
             color: #ff6600;
         }
 
+        .message ul {
+            list-style-type: disc;
+            padding-left: 30px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .message ul li {
+            margin-bottom: 12px;
+        }
+
         form {
             display: flex;
-            margin: 20px auto;
+            margin: 30px auto;
             max-width: 800px;
             padding: 0 20px;
         }
 
         input[type="text"] {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            border-radius: 8px;
         }
 
         button {
             background-color: #ff6600;
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 14px 22px;
             margin-left: 10px;
             font-size: 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
         }
 
@@ -104,36 +113,19 @@
         }
 
         .icon {
-            height: 20px;
+            height: 22px;
             vertical-align: middle;
             margin-right: 5px;
         }
 
-        /* Extra nette opsomming */
         .assistant p {
-            margin: 12px 0;
+            margin: 16px 0;
         }
 
-        .option-block {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .option-block div {
-            background: #f9f9f9;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            flex: 1 1 45%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-
-        @media (max-width: 600px) {
-            .option-block div {
-                flex: 1 1 100%;
-            }
+        img.chat-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -145,9 +137,9 @@
 
     <div class="chat-container" id="chat-box">
         <div class="message assistant">
-            <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV keuzehulp" style="width:100%; border-radius: 10px; margin-bottom: 15px;">
+            <img src="{{ url_for('static', filename='tv_keuzehulp.png') }}" alt="TV keuzehulp" class="chat-image">
             <strong><img src="{{ url_for('static', filename='Expert logo 1.png') }}" class="icon"> Expert AI:</strong>
-            <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br>> Zullen we beginnen?</p>
+            <p>Welkom! Fijn dat je er bent. Ik help je graag bij het vinden van de perfecte televisie.<br><br>> Zullen we beginnen?</p>
         </div>
     </div>
 
