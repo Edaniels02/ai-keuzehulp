@@ -1,10 +1,11 @@
 import os
 import logging
 import pandas as pd
-from flask import Flask, request, jsonify, render_template, send_from_directory, session
+from flask import Flask, request, jsonify, render_template, send_from_directory, session, Response, request as flask_request
 from flask_cors import CORS
 from openai import OpenAI
 import re
+from functools import wraps
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -13,6 +14,25 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "supersecret")
 CORS(app)
+
+# Simple authentication decorator
+def check_auth(username, password):
+    return username == 'expert' and password == '281617'
+
+def authenticate():
+    return Response(
+        'Login vereist', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'}
+    )
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = flask_request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 # Load product feed
 try:
@@ -45,10 +65,12 @@ system_prompt = (
 )
 
 @app.route("/")
+@requires_auth
 def home():
     return "AI Keuzehulp is actief."
 
 @app.route("/keuzehulp")
+@requires_auth
 def keuzehulp():
     session.clear()
     session['messages'] = [{"role": "system", "content": system_prompt}]
@@ -56,6 +78,7 @@ def keuzehulp():
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
+@requires_auth
 def chat():
     data = request.get_json()
     user_input = data.get("message")
@@ -132,6 +155,7 @@ def chat():
         return jsonify({"assistant": f"Fout bij OpenAI: {e}"}), 500
 
 @app.route("/static/<path:path>")
+@requires_auth
 def send_static(path):
     return send_from_directory("static", path)
 
