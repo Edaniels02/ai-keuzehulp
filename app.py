@@ -24,7 +24,7 @@ except Exception as e:
     logging.error(f"Failed to load product feed: {e}")
     unieke_merken = []
 
-merk_opties = "\n".join([f"\u2022 {merk}" for merk in unieke_merken])
+merk_opties = "\n".join([f"• {merk}" for merk in unieke_merken])
 
 system_prompt = (
     "Je bent de AI Keuzehulp van Expert.nl. Je bent behulpzaam, vriendelijk en praat alsof je naast de klant staat in de winkel. "
@@ -50,7 +50,6 @@ system_prompt = (
     "• C: €1000–€1500\n"
     "• D: €1500–€2000\n"
     "• E: Meer dan €2000\n"
-    "(Gebruik dit direct om het aanbod te beperken in de catalogus en vervolgvragen te richten op realistische opties.)\n"
     "3. Heb je een voorkeur voor een merk?\n"
     f"{merk_opties}\n"
     "• Geen voorkeur\n"
@@ -66,7 +65,6 @@ system_prompt = (
     "• QLED\n"
     "• LED\n"
     "• Weet ik niet\n"
-    "(Leg indien nodig kort de verschillen uit.)\n"
     "6. Zijn er extra functies belangrijk voor je?\n"
     "• Ambilight\n"
     "• HDMI 2.1\n"
@@ -74,25 +72,10 @@ system_prompt = (
     "• Geen voorkeur\n"
     "\n\nAccessoire-advies:\n"
     "• Als de klant een muurbeugel of accessoire noemt, filter op formaat, bevestigingstype en VESA-maat.\n"
-    "• Toon maximaal 2 suggesties met prijs en klikbare link als beschikbaar."
-    "\n\nOpeningsvraag:\n"
-    "Zullen we samen even door een paar vragen lopen om de perfecte tv voor jou te vinden?\n"
-    "• Als de klant akkoord gaat, begin dan meteen vriendelijk en met energie aan vraag 1.\n"
-    "• Bij twijfel: stel gerust, en bied aan om alsnog samen te kijken."
-    "\n\nProductcatalogus gebruik:\n"
-    "• Gebruik alleen tv’s uit de catalogus die binnen het opgegeven budget passen.\n"
-    "• Gebruik merk, formaat en features om keuzes te filteren.\n"
-    "• Vermeld kort prijs en waarom een model goed past.\n"
-    "• Zeg het erbij als iets niet op voorraad is en stel een alternatief voor."
+    "• Toon maximaal 2 suggesties met prijs en klikbare link als beschikbaar.\n"
     "\n\nLet op:\n"
-    "• Herhaal geen vragen die al beantwoord zijn.\n"
-    "• Vraag bij twijfel of iemand terug wil naar een vorige stap.\n"
-    "• Geef geen negatieve uitspraken over merken of concurrenten.\n"
-    "• Gebruik emoji’s alleen als het helpt om een gevoel of nuance duidelijk te maken."
-    "\n\nWeergave instructies:\n"
-    "• Gebruik altijd bullets (ronde stippen) als je meerdere keuzes toont. Zet nooit meerdere opties in één zin, maar elk op een aparte regel.\n"
-    "• Gebruik de exacte merkenlijst die is aangeleverd in de system prompt. Als de gebruiker vraagt naar merken (of de vraag herhaalt), toon dan opnieuw dezelfde lijst — en verzin geen andere merken.\n"
-    "• Verzin geen extra merken die niet in de lijst staan."
+    "• Gebruik altijd bullets.\n"
+    "• Verzin geen merken die niet in de aangeleverde lijst staan.\n"
 )
 
 @app.route("/")
@@ -117,7 +100,6 @@ def chat():
     conversation = session.get("messages", [{"role": "system", "content": system_prompt}])
     conversation.append({"role": "user", "content": user_input})
 
-    # Sla antwoorden op
     answers = session.get("answers", {})
     if any(keyword in user_input.lower() for keyword in ["films", "sport", "gamen", "tv-kijken", "combinatie"]):
         answers['usage'] = user_input
@@ -131,17 +113,43 @@ def chat():
         answers['technology'] = user_input
     session['answers'] = answers
 
-    # Harde filtering
     notes = []
+    suggesties = []
+
     if 'brand' in answers and 'ambilight' in user_input.lower() and 'philips' not in answers['brand'].lower():
         notes.append("Ambilight is alleen beschikbaar bij Philips.")
+
     if 'budget' in answers and 'size' in answers and 'technology' in answers:
         try:
             budget_value = int(''.join(filter(str.isdigit, answers['budget'])))
-            if 'oled' in answers['technology'].lower() and budget_value < 1000:
-                notes.append("OLED-tv's onder €1000 zijn zeer zeldzaam, we adviseren LED of QLED te overwegen.")
-        except:
-            pass
+            size_value = int(''.join(filter(str.isdigit, answers['size'])))
+            tech_value = answers['technology'].lower()
+
+            filtered_df = df.copy()
+            filtered_df = filtered_df[
+                (filtered_df['formaat'].str.contains(str(size_value), na=False)) &
+                (filtered_df['technologie'].str.lower().str.contains(tech_value, na=False)) &
+                (filtered_df['prijs'] <= budget_value)
+            ]
+
+            if filtered_df.empty:
+                notes.append("Let op: Er zijn geen TV's beschikbaar die voldoen aan het gekozen formaat, technologie en budget.")
+                
+                # Alternatieven zoeken en sorteren
+                alternative_df = df.copy()
+                alternative_df = alternative_df[alternative_df['prijs'] <= budget_value]
+                alternative_df['sort_formaat'] = alternative_df['formaat'].str.extract(r'(\\d+)').astype(float)
+                tech_priority = {'oled': 1, 'qled': 2, 'led': 3}
+                alternative_df['sort_technologie'] = alternative_df['technologie'].str.lower().map(tech_priority).fillna(99)
+                alternative_df = alternative_df.sort_values(by=['sort_formaat', 'sort_technologie'])
+
+                suggestions = alternative_df[['formaat', 'technologie']].drop_duplicates().values.tolist()
+                suggesties = [f"{s[0]} {s[1]}" for s in suggestions]
+
+                if suggesties:
+                    notes.append("Mogelijke alternatieven: " + ', '.join(suggesties[:5]))
+        except Exception as e:
+            logging.error(f"Fout bij realiteitscontrole: {e}")
 
     MAX_HISTORY = 20
     conversation_trimmed = [conversation[0]] + conversation[-MAX_HISTORY:]
