@@ -4,6 +4,7 @@ import pandas as pd
 from flask import Flask, request, jsonify, render_template, send_from_directory, session
 from flask_cors import CORS
 from openai import OpenAI
+import re
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -115,10 +116,17 @@ def chat():
         )
 
         antwoord = response.choices[0].message.content
-        conversation.append({"role": "assistant", "content": antwoord})
+
+        # Extra: vervang - of * door echte HTML bullets
+        antwoord_html = re.sub(r"(?m)^[-\*]\s+", "<li>", antwoord)
+        antwoord_html = antwoord_html.replace("\n", "</li>\n")
+        if "<li>" in antwoord_html:
+            antwoord_html = "<ul>" + antwoord_html + "</ul>"
+
+        conversation.append({"role": "assistant", "content": antwoord_html})
         session["messages"] = conversation
 
-        return jsonify({"assistant": antwoord})
+        return jsonify({"assistant": antwoord_html})
     except Exception as e:
         logging.error(f"OpenAI fout: {e}")
         return jsonify({"assistant": f"Fout bij OpenAI: {e}"}), 500
@@ -131,5 +139,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
-
 
