@@ -18,13 +18,13 @@ df = None
 try:
     df = pd.read_csv(os.path.join("data", "productfeed.csv"), skipinitialspace=True)
     df = df[df["categorie"].str.contains("Televisies", na=False)]
-    unieke_merken = sorted(df["merk"].dropna().unique().tolist())
+    unieke_merken = df["merk"].value_counts().index.tolist()
     logging.info(f"Loaded product feed with {len(df)} TVs from {len(unieke_merken)} merken.")
 except Exception as e:
     logging.error(f"Failed to load product feed: {e}")
     unieke_merken = []
 
-merk_opties = "\n".join([f"\u2022 {chr(65+i)}: {merk}" for i, merk in enumerate(unieke_merken)])
+merk_opties = "\n".join([f"\u2022 {merk}" for merk in unieke_merken])
 
 system_prompt = (
     "Je bent de AI Keuzehulp van Expert.nl. Je bent behulpzaam, vriendelijk en praat alsof je naast de klant staat in de winkel. "
@@ -53,7 +53,7 @@ system_prompt = (
     "(Gebruik dit direct om het aanbod te beperken in de catalogus en vervolgvragen te richten op realistische opties.)\n"
     "3. Heb je een voorkeur voor een merk?\n"
     f"{merk_opties}\n"
-    "• Z: Geen voorkeur\n"
+    "• Geen voorkeur\n"
     "4. Welk formaat zoek je?\n"
     "• 43\"\n"
     "• 50\"\n"
@@ -89,6 +89,10 @@ system_prompt = (
     "• Vraag bij twijfel of iemand terug wil naar een vorige stap.\n"
     "• Geef geen negatieve uitspraken over merken of concurrenten.\n"
     "• Gebruik emoji’s alleen als het helpt om een gevoel of nuance duidelijk te maken."
+    "\n\nWeergave instructies:\n"
+    "• Gebruik altijd bullets (ronde stippen) als je meerdere keuzes toont. Zet nooit meerdere opties in één zin, maar elk op een aparte regel.\n"
+    "• Gebruik de exacte merkenlijst die is aangeleverd in de system prompt. Als de gebruiker vraagt naar merken (of de vraag herhaalt), toon dan opnieuw dezelfde lijst — en verzin geen andere merken.\n"
+    "• Verzin geen extra merken die niet in de lijst staan."
 )
 
 @app.route("/")
@@ -112,8 +116,8 @@ def chat():
     conversation = session.get("messages", [{"role": "system", "content": system_prompt}])
     conversation.append({"role": "user", "content": user_input})
 
-    # Trim conversation to improve speed (keep system + last 10 messages)
-    MAX_HISTORY = 10
+    # Trim conversation to improve speed (keep system + last 20 messages)
+    MAX_HISTORY = 20
     conversation_trimmed = [conversation[0]] + conversation[-MAX_HISTORY:]
 
     try:
@@ -122,7 +126,7 @@ def chat():
             model=os.getenv("OPENAI_MODEL", "gpt-4-turbo"),
             messages=conversation_trimmed,
             temperature=0.7,
-            max_tokens=500  # verlaagd voor snelheid
+            max_tokens=700
         )
         antwoord = response.choices[0].message.content
         conversation.append({"role": "assistant", "content": antwoord})
