@@ -103,6 +103,7 @@ def home():
 def keuzehulp():
     session.clear()
     session['messages'] = [{"role": "system", "content": system_prompt}]
+    session['answers'] = {}
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
@@ -116,15 +117,43 @@ def chat():
     conversation = session.get("messages", [{"role": "system", "content": system_prompt}])
     conversation.append({"role": "user", "content": user_input})
 
-    # Trim conversation to improve speed (keep system + last 20 messages)
+    # Sla antwoorden op
+    answers = session.get("answers", {})
+    if any(keyword in user_input.lower() for keyword in ["films", "sport", "gamen", "tv-kijken", "combinatie"]):
+        answers['usage'] = user_input
+    if any(keyword in user_input.lower() for keyword in ["750", "1000", "1500", "2000"]):
+        answers['budget'] = user_input
+    if any(merk.lower() in user_input.lower() for merk in unieke_merken):
+        answers['brand'] = user_input
+    if any(size in user_input for size in ["43", "50", "55", "65", "75"]):
+        answers['size'] = user_input
+    if any(tech in user_input.lower() for tech in ["oled", "qled", "led"]):
+        answers['technology'] = user_input
+    session['answers'] = answers
+
+    # Harde filtering
+    notes = []
+    if 'brand' in answers and 'ambilight' in user_input.lower() and 'philips' not in answers['brand'].lower():
+        notes.append("Ambilight is alleen beschikbaar bij Philips.")
+    if 'budget' in answers and 'size' in answers and 'technology' in answers:
+        try:
+            budget_value = int(''.join(filter(str.isdigit, answers['budget'])))
+            if 'oled' in answers['technology'].lower() and budget_value < 1000:
+                notes.append("OLED-tv's onder €1000 zijn zeer zeldzaam, we adviseren LED of QLED te overwegen.")
+        except:
+            pass
+
     MAX_HISTORY = 20
     conversation_trimmed = [conversation[0]] + conversation[-MAX_HISTORY:]
 
     try:
         client = OpenAI()
+        prompt_messages = conversation_trimmed
+        if notes:
+            prompt_messages.append({"role": "system", "content": "Belangrijke opmerkingen: " + ' '.join(notes)})
         response = client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-4-turbo"),
-            messages=conversation_trimmed,
+            messages=prompt_messages,
             temperature=0.7,
             max_tokens=700
         )
@@ -146,5 +175,4 @@ def send_static(path):
 def handle_exception(e):
     logging.error(f"Unhandled exception: {e}")
     return jsonify({"assistant": f"Interne fout: {e}"}), 500
-
 
